@@ -2,9 +2,9 @@ spring:
   #数据库连接信息
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL:jdbc:mysql://172.17.0.1:3306}
-    username: ${DB_USERNAME:firefly}
-    password: ${DB_PASSWROD:firefly}
+    url: ${DB_URL:jdbc:mysql://localhost:3306}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWROD:635123}
   #文件上传的配置
   servlet:
     multipart:
@@ -18,10 +18,10 @@ spring:
       data-locations: classpath:db/data.sql
   #redis数据库连接
   redis:
-    host: ${REDIS_URL:172.17.0.1}
+    host: ${REDIS_URL:127.0.0.1}
     port: ${REDIS_PORT:6379}
     username: ${REDIS_USERNAME:default}
-    password: ${REDIS_PASSWROD:firefly}
+    password: ${REDIS_PASSWROD:635123}
     database: ${REDIS_DATABASE:0}
     jedis:
       pool:
@@ -35,6 +35,9 @@ spring:
         min-idle: 0
     #连接超时时间
     connect-timeout: 10000
+  session:
+    store-type: redis
+    timeout: 86400
 #Mybatis配置
 mybatis:
   configuration:
