@@ -1,4 +1,4 @@
-package com.firefly.sharecloud.pojo;
+package com.firefly.sharemount.pojo;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -8,18 +8,17 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+import java.math.BigInteger;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class UserInfo {
     @NotNull
     @JsonIgnore
-    private Integer id; // 主键ID
+    private BigInteger id; // 主键ID
 
-
-    private String userName; // 用户名
+    private BigInteger userId; // user表id
 
     @JsonIgnore
     private String password; //用户密码
@@ -27,10 +26,12 @@ public class User {
     @Email
     private String email;
 
-    private Integer allocated;
-
     @JsonIgnore
     private String phoneNumber;
+
+    private Integer allocated;
+
+
 
 //    @JsonIgnore
 //    private LocalDateTime createTime;//创建时间

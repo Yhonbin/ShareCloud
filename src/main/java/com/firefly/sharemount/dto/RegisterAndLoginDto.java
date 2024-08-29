@@ -1,4 +1,4 @@
-package com.firefly.sharecloud.dto;
+package com.firefly.sharemount.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

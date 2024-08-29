@@ -1,4 +1,4 @@
-package com.firefly.sharecloud.utils;
+package com.firefly.sharemount.utils;
 
 public class RegexPatterns {
     /**

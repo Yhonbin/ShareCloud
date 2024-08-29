@@ -1,4 +1,4 @@
-package com.firefly.sharecloud.pojo;
+package com.firefly.sharemount.pojo;
 
 //统一响应结果
 

@@ -1,4 +1,4 @@
-package com.firefly.sharecloud.dto;
+package com.firefly.sharemount.dto;
 
 
 import io.swagger.annotations.ApiModelProperty;
@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
@@ -29,7 +28,7 @@ public class RegisterDTO {
     private String verifyWay;
 
     @NotNull(message = "验证码不能为空")
-    @Length(min = 4, max = 4, message = "验证码长度为4位")
+    @Length(min = 6, max = 6, message = "验证码长度为6位")
     private String verification;
 
     @ApiModelProperty(value = "密码", required = true, example = "toor")

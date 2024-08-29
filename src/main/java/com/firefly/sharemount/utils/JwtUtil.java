@@ -1,4 +1,4 @@
-package com.firefly.sharecloud.utils;
+package com.firefly.sharemount.utils;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;

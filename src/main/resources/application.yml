@@ -1,8 +1,27 @@
 spring:
+  #redis数据库连接
+  redis:
+    host: ${REDIS_URL:localhost}
+    port: ${REDIS_PORT:6379}
+    #username: ${REDIS_USERNAME:default}
+    password: ${REDIS_PASSWROD:635123}
+    database: ${REDIS_DATABASE:1}
+    lettuce:
+      pool:
+        #最大连接数
+        max-active: 8
+        #最大阻塞等待时间(负数表示没限制)
+        max-wait: -1
+        #最大空闲
+        max-idle: 8
+        #最小空闲
+        min-idle: 0
+    #连接超时时间
+    connect-timeout: 6400
   #数据库连接信息
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL:jdbc:mysql://localhost:3306}
+    url: ${DB_URL:jdbc:mysql://localhost:3306/sharemount?createDatabaseIfNotExist=true}
     username: ${DB_USERNAME:root}
     password: ${DB_PASSWROD:635123}
   #文件上传的配置
@@ -16,28 +35,6 @@ spring:
       mode: always
       schema-locations: classpath:db/schema.sql
       data-locations: classpath:db/data.sql
-  #redis数据库连接
-  redis:
-    host: ${REDIS_URL:127.0.0.1}
-    port: ${REDIS_PORT:6379}
-    username: ${REDIS_USERNAME:default}
-    password: ${REDIS_PASSWROD:635123}
-    database: ${REDIS_DATABASE:0}
-    jedis:
-      pool:
-        #最大连接数
-        max-active: 8
-        #最大阻塞等待时间(负数表示没限制)
-        max-wait: -1
-        #最大空闲
-        max-idle: 8
-        #最小空闲
-        min-idle: 0
-    #连接超时时间
-    connect-timeout: 10000
-  session:
-    store-type: redis
-    timeout: 86400
 #Mybatis配置
 mybatis:
   configuration:
