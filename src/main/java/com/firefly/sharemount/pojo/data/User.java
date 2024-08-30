@@ -1,4 +1,4 @@
-package com.firefly.sharemount.pojo;
+package com.firefly.sharemount.pojo.data;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

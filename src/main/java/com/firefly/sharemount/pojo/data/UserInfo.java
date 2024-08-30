@@ -1,4 +1,4 @@
-package com.firefly.sharemount.pojo;
+package com.firefly.sharemount.pojo.data;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;

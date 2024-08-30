@@ -1,8 +1,8 @@
 package com.firefly.sharemount.mapper;
 
 
-import com.firefly.sharemount.pojo.User;
-import com.firefly.sharemount.pojo.UserInfo;
+import com.firefly.sharemount.pojo.data.User;
+import com.firefly.sharemount.pojo.data.UserInfo;
 import org.apache.ibatis.annotations.*;
 
 import java.math.BigInteger;

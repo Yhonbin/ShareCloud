@@ -1,7 +1,7 @@
 package com.firefly.sharemount.service;
 
-import com.firefly.sharemount.pojo.User;
-import com.firefly.sharemount.pojo.UserInfo;
+import com.firefly.sharemount.pojo.data.User;
+import com.firefly.sharemount.pojo.data.UserInfo;
 
 import java.math.BigInteger;
 

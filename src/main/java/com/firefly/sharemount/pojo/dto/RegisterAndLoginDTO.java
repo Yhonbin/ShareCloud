@@ -1,4 +1,4 @@
-package com.firefly.sharemount.dto;
+package com.firefly.sharemount.pojo.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -10,7 +10,7 @@ import javax.validation.constraints.Email;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterAndLoginDto {
+public class RegisterAndLoginDTO {
     @ApiModelProperty(value = "用户名",required = true,example = "root")
 
     private String username;

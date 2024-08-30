@@ -7,9 +7,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class ShareCloudApplication {
+public class ShareMountApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(ShareCloudApplication.class, args);
+        SpringApplication.run(ShareMountApplication.class, args);
     }
 }

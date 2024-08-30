@@ -1,4 +1,4 @@
-package com.firefly.sharemount.dto;
+package com.firefly.sharemount.pojo.dto;
 
 
 import io.swagger.annotations.ApiModelProperty;

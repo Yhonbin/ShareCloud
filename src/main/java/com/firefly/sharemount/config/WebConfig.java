@@ -1,7 +1,6 @@
 package com.firefly.sharemount.config;
 
-import com.firefly.sharemount.interceptors.LoginInterceptor;
-import org.springframework.context.annotation.Configuration;
+import com.firefly.sharemount.controller.interceptors.LoginInterceptor;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 

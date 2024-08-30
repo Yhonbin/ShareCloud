@@ -1,9 +1,9 @@
 package com.firefly.sharemount.service.impl;
 
 import com.firefly.sharemount.mapper.UserMapper;
-import com.firefly.sharemount.pojo.Result;
-import com.firefly.sharemount.pojo.User;
-import com.firefly.sharemount.pojo.UserInfo;
+import com.firefly.sharemount.pojo.data.Result;
+import com.firefly.sharemount.pojo.data.User;
+import com.firefly.sharemount.pojo.data.UserInfo;
 import com.firefly.sharemount.service.UserService;
 import com.firefly.sharemount.utils.RegexUtil;
 import com.firefly.sharemount.utils.Sha256Util;
