@@ -14,8 +14,8 @@ public class RegexPatterns {
      */
     public static final String PASSWORD_REGEX = "^\\w{4,32}$";
     /**
-     * 验证码正则, 4位数字或字母
+     * 验证码正则, 6位数字
      */
-    public static final String VERIFY_CODE_REGEX = "^[a-zA-Z\\d]{4}$";
+    public static final String VERIFY_CODE_REGEX = "^[\\d]{6}$";
 
 }
