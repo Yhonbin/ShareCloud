@@ -10,13 +10,4 @@ public interface UserService {
 
 
     User findByName(String name);
-
-    void register(String userName, String password, String verifyWay);
-
-
-    UserInfo findByUserPhoneNumber(String loginName);
-
-    UserInfo findByUserEmail(String loginName);
-
-    UserInfo findByUserId(BigInteger id);
 }

@@ -1,8 +1,10 @@
 package com.firefly.sharemount.controller.interceptors;
 
+import com.firefly.sharemount.component.KeyValueTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -13,11 +15,15 @@ import java.math.BigInteger;
 
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
+
+    @Resource
+    private KeyValueTemplate keyValueTemplate;
+
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws IOException {
         HttpSession httpSession = request.getSession();
-        BigInteger userId = (BigInteger) httpSession.getAttribute("userId");
-        if (userId == null) {
+        String catchUuid = keyValueTemplate.get("SESSION:UUID:" + httpSession.getId());
+        if (catchUuid == null) {
             response.setStatus(401);
             response.setContentType("application/json;charset=utf-8");
             PrintWriter out = response.getWriter();

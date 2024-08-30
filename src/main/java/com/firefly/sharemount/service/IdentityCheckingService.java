@@ -2,7 +2,7 @@ package com.firefly.sharemount.service;
 
 public interface IdentityCheckingService {
 
-    boolean sendEmailCode(String email);
+    void sendEmailCode(String email);
 
     boolean checkEmailCode(String email, String code);
 
@@ -10,5 +10,5 @@ public interface IdentityCheckingService {
 
     boolean checkSmsCode(String phoneNumber, String code);
 
-    void login(String verification, String password);
+
 }
