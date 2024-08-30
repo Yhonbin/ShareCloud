@@ -1,10 +1,7 @@
 package com.firefly.sharemount.mapper;
 
 import com.firefly.sharemount.pojo.data.VirtualFolder;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -22,4 +19,10 @@ public interface FilesystemMapper {
 
     @Update("UPDATE filesystem SET is_deleted = 1 WHERE id = #{id}")
     void deleteById(@Param("id") BigInteger id);
+
+    @Insert("INSERT INTO filesystem(name, parent) VALUES(#{fileName},null)")
+    void addFilesystem(@Param("fileName") String fileName);
+
+    @Select("SELECT LAST_INSERT_ID()")
+    BigInteger getInsertId();
 }

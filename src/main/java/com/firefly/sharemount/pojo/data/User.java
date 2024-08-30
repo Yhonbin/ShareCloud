@@ -14,7 +14,7 @@ public class User {
     @NotNull
     BigInteger id; // 主键
 
-    BigInteger root;
-
     String name; //用户名
+
+    BigInteger root; // 根文件夹主键
 }

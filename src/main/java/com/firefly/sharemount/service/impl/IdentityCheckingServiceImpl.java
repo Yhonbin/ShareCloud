@@ -13,29 +13,28 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
     @Resource
     private KeyValueTemplate keyValueTemplate;
 
-
     private static final Integer TIME_OUT_SECOND = 60;
 
     private static final String REDIS_EMAIL_VERIFICATION_FORMAT = "Email:%s";
     private static final String REDIS_SMS_VERIFICATION_FORMAT = "PhoneNumber:%s";
 
     @Override
-    public boolean sendEmailCode(String email) {
-        if (RegexUtil.isEmailInvalid(email)) {
-            return false;
-        }
+    public void sendEmailCode(String email) {
+
         String code = VerifyingCodeUtil.generateVerifyCode(6);
         keyValueTemplate.set(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),code);
         keyValueTemplate.setExpire(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),TIME_OUT_SECOND);
         //todo
-
-        return true;
     }
 
     @Override
     public boolean checkEmailCode(String email, String code) {
-
-
+        String catchCode = keyValueTemplate.get(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));
+        if (catchCode != null && catchCode.equals(code)) {
+            // 销毁验证码
+            keyValueTemplate.remove(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));
+            return true;
+        }
         return false;
     }
 
@@ -57,8 +56,5 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
         return false;
     }
 
-    @Override
-    public void login(String verification, String password) {
 
-    }
 }
