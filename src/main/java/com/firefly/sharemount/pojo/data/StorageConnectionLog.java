@@ -6,15 +6,18 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.math.BigInteger;
+import java.util.Date;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class StorageConnectionLog {
     @NotNull
-    BigInteger id; // 主键
+    private BigInteger id;
 
-    BigInteger root;
+    private Date updateTime;
 
-    String name; //用户名
+    private Boolean success;
+
+    private String log;
 }

@@ -10,11 +10,13 @@ import java.math.BigInteger;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class SymbolicLink {
     @NotNull
-    BigInteger id; // 主键
+    private BigInteger id;
 
-    BigInteger root;
+    private BigInteger parent;
 
-    String name; //用户名
+    private String name;
+
+    private BigInteger targetUser;
 }

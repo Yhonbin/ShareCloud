@@ -10,11 +10,15 @@ import java.math.BigInteger;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class Storage {
     @NotNull
-    BigInteger id; // 主键
+    private BigInteger id;
 
-    BigInteger root;
+    private BigInteger owner;
 
-    String name; //用户名
+    private String name;
+
+    private Integer occupation;
+
+    private Boolean readonly;
 }

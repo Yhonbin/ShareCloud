@@ -10,11 +10,11 @@ import java.math.BigInteger;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class VirtualFolder {
     @NotNull
-    BigInteger id; // 主键
+    private BigInteger id;
 
-    BigInteger root;
+    private String name;
 
-    String name; //用户名
+    private BigInteger parent;
 }
