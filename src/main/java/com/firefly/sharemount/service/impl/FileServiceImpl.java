@@ -64,24 +64,38 @@ public class FileServiceImpl implements FileService {
     }
 
     public FileBO findFileBO(User user, Queue<String> path) {
+        if (user == null) return null;
         VirtualFolder folder = fsMapper.getById(user.getRoot());
         if (folder == null) return null;
         folder = findLastVirtualFolder(folder, path);
         if (path.isEmpty()) {
             BigInteger storageId = findLastStorageId(folder);
             Storage storage = storageId == null ? null : storageMapper.getById(storageId);
-            return new FileBO(storage, folder, user, path, null);
+            return new FileBO(storage, folder, user, null, null, path);
         }
         SymbolicLink tryLink = symbolicLinkMapper.findByParentPathAndName(folder.getId(), path.peek());
         if (tryLink != null) {
             path.poll();
-            // TODO
+            User targetUser = userMapper.getById(tryLink.getTargetUser());
+            if (targetUser == null)
+                return path.isEmpty() ? new FileBO(null, null, null, tryLink, user, path) : null;
             String target = symbolicLinkMapper.getTargetPathById(tryLink.getId());
             boolean isSelfSymbolicLink = path.isEmpty();
             Queue<String> nextPath = pathArrayToQueue(target.split("/"));
             while (!path.isEmpty()) nextPath.offer(path.poll());
-            FileBO linked = findFileBO(tryLink.getTargetUser(), nextPath);
+            FileBO linked = findFileBO(targetUser, nextPath);
+            if (linked == null)
+                return isSelfSymbolicLink ? new FileBO(null, null, null, tryLink, user, path) : null;
+            if (isSelfSymbolicLink) {
+                linked.setSymbolicLink(tryLink);
+                linked.setLinkOwner(user);
+            }
+            return linked;
         }
+        BigInteger storageId = findLastStorageId(folder);
+        Storage storage = storageId == null ? null : storageMapper.getById(storageId);
+        if (storage == null) return null;
+        return new FileBO(storage, null, null, null, null, path);
     }
 
     @Override
