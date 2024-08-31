@@ -1,6 +1,6 @@
 version: '3'
 services:
-  fmdetection:
+  sharemount:
     build: .
     ports:
       - "40071:8080"
