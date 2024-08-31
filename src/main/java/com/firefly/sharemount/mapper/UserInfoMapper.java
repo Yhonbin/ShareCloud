@@ -18,8 +18,9 @@ public interface UserInfoMapper {
     @Select("SELECT * FROM user_info WHERE user_id = #{userId} AND is_deleted = 0")
     UserInfo findByUserId(@Param("userId") BigInteger userId);
 
-    @Insert("INSERT INTO user_info(user_id, password, email, phone_number)" +
-            "VALUES (#{userId},#{Sha256Password}, #{email}, #{phoneNumber})")
+    @Insert("INSERT INTO user_info(user_id, password, email, phone_number,allocated)" +
+            "VALUES (#{userId},#{Sha256Password}, #{email}, #{phoneNumber}, #{allocated})")
     void addUserInfo(@Param("userId") BigInteger userId, @Param("Sha256Password") String Sha256Password,
-                     @Param("email") String email, @Param("phoneNumber") String phoneNumber);
+                     @Param("email") String email, @Param("phoneNumber") String phoneNumber,
+                     @Param("allocated") Long allocated);
 }

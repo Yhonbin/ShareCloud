@@ -1,0 +1,22 @@
+spring:
+  mail:
+    # 发送者邮箱
+    username: 1466450232@qq.com
+    #申请到的授权码
+    password: rkzpmwtiefqhgdja
+    # 配置 SMTP 服务器地址
+    host: smtp.qq.com
+    # 端口号465或587
+    port: 465
+    protocol: smtps
+    # 默认的邮件编码为UTF-8
+    default-encoding: UTF-8
+    # 配置SSL 加密工厂
+    properties:
+      mail:
+        smtp:
+          socketFactoryClass: javax.net.ssl.SSLSocketFactory
+
+cloud-drive:
+  default-allocation: 1024  # 默认存储MB
+

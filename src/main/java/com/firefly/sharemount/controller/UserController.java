@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
@@ -46,7 +47,7 @@ public class UserController {
     private IdentityCheckingService identityCheckingService;
 
     @PostMapping("/email-verify")
-    public Result<Object> sendEmailCode(@RequestBody JSONObject jsonObject) {
+    public Result<Object> sendEmailCode(@RequestBody JSONObject jsonObject) throws MessagingException {
         String email = jsonObject.getString("account");
         if (RegexUtil.isEmailInvalid(email)) {
             return Result.error(404,"邮箱格式错误");

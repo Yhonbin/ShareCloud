@@ -1,5 +1,6 @@
 package com.firefly.sharemount.service.impl;
 
+import com.firefly.sharemount.config.ApplicationConfiguration;
 import com.firefly.sharemount.mapper.FilesystemMapper;
 import com.firefly.sharemount.mapper.ParticipationMapper;
 import com.firefly.sharemount.mapper.UserInfoMapper;
@@ -30,6 +31,9 @@ public class UserInfoServiceImpl implements UserInfoService {
     @Resource
     private UserMapper userMapper;
 
+    @Resource
+    private ApplicationConfiguration applicationConfiguration;
+
     @Override
     @Transactional
     public User register(String username, String email,String phoneNumber, String password) {
@@ -42,9 +46,13 @@ public class UserInfoServiceImpl implements UserInfoService {
         userMapper.addUser(username,root);
         BigInteger userId = userMapper.getInsertId();
 
+
         // 在user_info中插入新项，设user_id=user新项主键
+        applicationConfiguration.loadConfig();
+        Long allocated = (Long) applicationConfiguration.getNestedConfig("cloud-drive.default-allocation");
         String Sha256Password = Sha256Util.getSHA256StrJava(password);
-        userInfoMapper.addUserInfo(userId, Sha256Password,email,phoneNumber);
+        userInfoMapper.addUserInfo(userId, Sha256Password,email,phoneNumber,allocated);
+
 
         return new User(userId,username,root);
     }
@@ -62,7 +70,8 @@ public class UserInfoServiceImpl implements UserInfoService {
         BigInteger groupId = userMapper.getInsertId();
 
         // 在participation中插入新项，设user_id=用户ID，group_id=user新项主键
-        participationMapper.addGroup(userId, groupId);
+        Long privilege = 1L;
+        participationMapper.addGroup(userId, groupId,privilege);
 
         return new User(groupId,groupName,root);
     }
