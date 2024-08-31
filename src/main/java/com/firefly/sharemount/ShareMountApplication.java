@@ -1,6 +1,5 @@
 package com.firefly.sharemount;
 
-import com.firefly.sharemount.config.ApplicationConfiguration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
