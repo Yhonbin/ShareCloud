@@ -10,5 +10,5 @@ import java.math.BigInteger;
 public interface ParticipationMapper {
 
     @Insert("INSERT INTO participation(user_id,group_id,privilege) VALUES(#{userId},#{groupId},#{privilege})")
-    void addGroup(@Param("userId") BigInteger userId, @Param("groupId") BigInteger groupId, @Param("privilege") Long privilege);
+    void addGroup(@Param("userId") BigInteger userId, @Param("groupId") BigInteger groupId, @Param("privilege") Integer privilege);
 }

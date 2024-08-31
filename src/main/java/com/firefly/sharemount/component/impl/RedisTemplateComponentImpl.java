@@ -1,12 +1,15 @@
 package com.firefly.sharemount.component.impl;
 
-import com.firefly.sharemount.component.KeyValueTemplate;
+import com.firefly.sharemount.component.RedisTemplateComponent;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.concurrent.TimeUnit;
 
-public class KeyValueTemplateRedisImpl implements KeyValueTemplate {
+@Service
+public class RedisTemplateComponentImpl implements RedisTemplateComponent {
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 

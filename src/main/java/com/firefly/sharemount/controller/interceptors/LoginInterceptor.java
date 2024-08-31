@@ -1,6 +1,8 @@
 package com.firefly.sharemount.controller.interceptors;
 
-import com.firefly.sharemount.component.KeyValueTemplate;
+
+import com.firefly.sharemount.component.RedisTemplateComponent;
+import org.springframework.data.keyvalue.core.KeyValueTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -17,12 +19,14 @@ import java.math.BigInteger;
 public class LoginInterceptor implements HandlerInterceptor {
 
     @Resource
-    private KeyValueTemplate keyValueTemplate;
+    private RedisTemplateComponent redisTemplateComponent;
 
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws IOException {
         HttpSession httpSession = request.getSession();
-        String catchUuid = keyValueTemplate.get("SESSION:UUID:" + httpSession.getId());
+        System.err.println(httpSession.getId());
+        String catchUuid = redisTemplateComponent.get("SESSION:UUID:" + httpSession.getId());
+        System.out.println(catchUuid);
         if (catchUuid == null) {
             response.setStatus(401);
             response.setContentType("application/json;charset=utf-8");

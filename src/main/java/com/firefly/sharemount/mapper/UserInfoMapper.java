@@ -22,5 +22,5 @@ public interface UserInfoMapper {
             "VALUES (#{userId},#{Sha256Password}, #{email}, #{phoneNumber}, #{allocated})")
     void addUserInfo(@Param("userId") BigInteger userId, @Param("Sha256Password") String Sha256Password,
                      @Param("email") String email, @Param("phoneNumber") String phoneNumber,
-                     @Param("allocated") Long allocated);
+                     @Param("allocated") Integer allocated);
 }

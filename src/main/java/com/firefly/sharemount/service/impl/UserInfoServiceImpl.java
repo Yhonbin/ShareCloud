@@ -49,7 +49,7 @@ public class UserInfoServiceImpl implements UserInfoService {
 
         // 在user_info中插入新项，设user_id=user新项主键
         applicationConfiguration.loadConfig();
-        Long allocated = (Long) applicationConfiguration.getNestedConfig("cloud-drive.default-allocation");
+        Integer allocated = (Integer) applicationConfiguration.getNestedConfig("cloud-drive.default-allocation");
         String Sha256Password = Sha256Util.getSHA256StrJava(password);
         userInfoMapper.addUserInfo(userId, Sha256Password,email,phoneNumber,allocated);
 
@@ -70,7 +70,7 @@ public class UserInfoServiceImpl implements UserInfoService {
         BigInteger groupId = userMapper.getInsertId();
 
         // 在participation中插入新项，设user_id=用户ID，group_id=user新项主键
-        Long privilege = 1L;
+        Integer privilege = 1;
         participationMapper.addGroup(userId, groupId,privilege);
 
         return new User(groupId,groupName,root);

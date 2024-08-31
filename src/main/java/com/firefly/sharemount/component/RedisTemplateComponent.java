@@ -1,6 +1,6 @@
 package com.firefly.sharemount.component;
 
-public interface KeyValueTemplate {
+public interface RedisTemplateComponent {
 
     void set(String key, String value);
 

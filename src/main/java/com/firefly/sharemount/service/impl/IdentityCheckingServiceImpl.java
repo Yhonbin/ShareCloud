@@ -1,6 +1,6 @@
 package com.firefly.sharemount.service.impl;
 
-import com.firefly.sharemount.component.KeyValueTemplate;
+import com.firefly.sharemount.component.RedisTemplateComponent;
 import com.firefly.sharemount.config.ApplicationConfiguration;
 import com.firefly.sharemount.service.IdentityCheckingService;
 import com.firefly.sharemount.utils.VerifyingCodeUtil;
@@ -16,7 +16,7 @@ import javax.mail.internet.MimeMessage;
 @Service
 public class IdentityCheckingServiceImpl implements IdentityCheckingService {
     @Resource
-    private KeyValueTemplate keyValueTemplate;
+    private RedisTemplateComponent redisTemplateComponent;
 
     @Resource
     private JavaMailSenderImpl mailSender;
@@ -41,18 +41,18 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
         // 获取验证码
         String senderEmail = (String)applicationConfiguration.getNestedConfig("spring.mail.username");
         helper.setFrom(senderEmail);
-        keyValueTemplate.set(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),code);
-        keyValueTemplate.setExpire(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),TIME_OUT_SECOND);
+        redisTemplateComponent.set(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),code);
+        redisTemplateComponent.setExpire(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),TIME_OUT_SECOND* 3L);
         mailSender.send(mimeMessage);
         //todo
     }
 
     @Override
     public boolean checkEmailCode(String email, String code) {
-        String catchCode = keyValueTemplate.get(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));
+        String catchCode = redisTemplateComponent.get(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));
         if (catchCode != null && catchCode.equals(code)) {
             // 销毁验证码
-            keyValueTemplate.remove(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));
+            redisTemplateComponent.remove(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));
             return true;
         }
         return false;
@@ -64,8 +64,8 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
             return false;
         }
         String code = VerifyingCodeUtil.generateVerifyCode(6);
-        keyValueTemplate.set(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),code);
-        keyValueTemplate.setExpire(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),TIME_OUT_SECOND);
+        redisTemplateComponent.set(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),code);
+        redisTemplateComponent.setExpire(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),TIME_OUT_SECOND);
         //todo
 
         return true;
