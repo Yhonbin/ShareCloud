@@ -5,7 +5,7 @@ spring:
     port: ${REDIS_PORT:6379}
     #username: ${REDIS_USERNAME:default}
     password: ${REDIS_PASSWROD:635123}
-    database: ${REDIS_DATABASE:1}
+    database: ${REDIS_DATABASE:0}
     lettuce:
       pool:
         #最大连接数
@@ -35,11 +35,30 @@ spring:
       mode: always
       schema-locations: classpath:db/schema.sql
       data-locations: classpath:db/data.sql
+  config:
+    additional-location: file:${PATH_TO_CONFIG:"./"}/config.yml
+  mail:
+    # 发送者邮箱
+    username: 1466450232@qq.com
+    #申请到的授权码
+    password: rkzpmwtiefqhgdja
+    # 配置 SMTP 服务器地址
+    host: smtp.qq.com
+    # 端口号465或587
+    port: 465
+    protocol: smtps
+    # 默认的邮件编码为UTF-8
+    default-encoding: UTF-8
+    # 配置SSL 加密工厂
+    properties:
+      mail:
+        smtp:
+          socketFactoryClass: javax.net.ssl.SSLSocketFactory
 #Mybatis配置
 mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
-oss:
-  name: minio
+
+pathToConfig: ${PATH_TO_CONFIG:.}

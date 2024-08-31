@@ -16,7 +16,7 @@ public interface UserMapper {
 
     @Insert("INSERT INTO user(name, root)" +
             "VALUES(#{username},#{root})")
-    BigInteger addUser(@Param("username") String username,@Param("root") BigInteger root);
+    void addUser(@Param("username") String username,@Param("root") BigInteger root);
 
     @Select("SELECT LAST_INSERT_ID()")
     BigInteger getInsertId();
