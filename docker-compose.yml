@@ -1,0 +1,25 @@
+version: '3'
+services:
+  fmdetection:
+    build: .
+    ports:
+      - "40071:8080"
+    environment:
+      - "DB_URL=jdbc:mysql://172.17.0.1:3306/sharemount?createDatabaseIfNotExist=true"
+      - "DB_USERNAME:sharemount"
+      - "DB_PASSWROD:firefly"
+      - "REDIS_URL:172.17.0.1"
+      - "REDIS_PORT:6379"
+      - "REDIS_USERNAME:default"
+      - "REDIS_PASSWROD:firefly"
+      - "REDIS_DATABASE:0"
+      - "SERVLET_MAX_FILE_SIZE:10MB"
+      - "SERVLET_MAX_REQUEST_SIZE:100MB"
+      - "USER_LOGIN_EXPIRE_TIME:2073600000"
+      - "WEIGHT_PATH:."
+      - "LEARNING_DEVICE_EXPIRE_TIME:10000"
+      - "THREAD_POOL_CORE_SIZE:10"
+      - "THREAD_POOL_MAX_SIZE:500"
+      - "THREAD_POOL_QUEUE_CAPACITY:100"
+      - "THREAD_POOL_KEEP_ALIVE_SECONDS:60"
+      - "PATH_TO_CONFIG:."

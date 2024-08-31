@@ -5,7 +5,7 @@ spring:
     port: ${REDIS_PORT:6379}
     #username: ${REDIS_USERNAME:default}
     password: ${REDIS_PASSWROD:635123}
-    database: ${REDIS_DATABASE:1}
+    database: ${REDIS_DATABASE:0}
     lettuce:
       pool:
         #最大连接数
