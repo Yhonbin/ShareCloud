@@ -14,7 +14,7 @@ public interface FilesystemMapper {
     @Select("SELECT * FROM filesystem WHERE parent = #{parent} AND is_deleted = 0")
     List<VirtualFolder> findChildren(@Param("parent") BigInteger parent);
 
-    @Select("SELECT * FROM filesystem LIMIT 1 WHERE parent = #{parent} AND name COLLATE utf8_general_ci = #{name} AND is_deleted = 0")
+    @Select("SELECT * FROM filesystem  WHERE parent = #{parent} AND name COLLATE utf8_general_ci = #{name} AND is_deleted = 0 LIMIT 1")
     VirtualFolder findChildByName(@Param("parent") BigInteger parent, @Param("name") String name);
 
     @Update("UPDATE filesystem SET is_deleted = 1 WHERE id = #{id}")
