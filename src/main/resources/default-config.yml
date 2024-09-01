@@ -20,3 +20,5 @@ spring:
 cloud-drive:
   default-allocation: 1024  # 默认存储MB
 
+connection:
+  retry-times: 1

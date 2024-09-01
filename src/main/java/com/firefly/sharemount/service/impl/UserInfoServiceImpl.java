@@ -39,7 +39,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     public User register(String username, String email,String phoneNumber, String password) {
         // 在filesystem中插入新项
         String fileName = "";
-        filesystemMapper.addFilesystem(fileName);
+        filesystemMapper.addUserRoot(fileName);
         BigInteger root = filesystemMapper.getInsertId();
 
         // 在user中插入新项，设root=filesystem新项主键
@@ -62,7 +62,7 @@ public class UserInfoServiceImpl implements UserInfoService {
     public User createGroup(BigInteger userId, String groupName) {
         // 在filesystem中插入新项
         String fileName = "";
-        filesystemMapper.addFilesystem(fileName);
+        filesystemMapper.addUserRoot(fileName);
         BigInteger root = filesystemMapper.getInsertId();
 
         // 在user中插入新项，设root=filesystem新项主键

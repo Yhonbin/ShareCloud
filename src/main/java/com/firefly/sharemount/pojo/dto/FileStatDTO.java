@@ -18,11 +18,13 @@ public class FileStatDTO {
 
     private Long size;
 
-    private Date lastModify;
+    private Date lastModified;
 
     private StorageStatDTO mount;
 
     private String linkTarget;
+
+    private UserDTO linkTargetUser;
 
     private FileStatDTO linkTargetStat;
 }

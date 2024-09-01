@@ -10,17 +10,11 @@ import java.math.BigInteger;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class StorageStatDTO {
+public class UserDTO {
     @NotNull
     BigInteger id;
 
-    UserDTO owner;
-
     String name;
 
-    Boolean readonly;
-
-    String type;
-
-    String connectionInfo;
+    Boolean isGroup;
 }

@@ -1,0 +1,45 @@
+package com.firefly.sharemount.controller;
+
+import com.firefly.sharemount.component.RedisTemplateComponent;
+import com.firefly.sharemount.pojo.data.FileBO;
+import com.firefly.sharemount.pojo.data.Result;
+import com.firefly.sharemount.pojo.dto.FileStatDTO;
+import com.firefly.sharemount.pojo.dto.ListFilesResponse;
+import com.firefly.sharemount.pojo.dto.SingleFileRequestDTO;
+import com.firefly.sharemount.service.FileService;
+import io.swagger.annotations.Api;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import java.math.BigInteger;
+
+@Api(tags = "文件管理接口")
+@RestController
+@RequestMapping("/api/file")
+public class FileController {
+    @Resource
+    private RedisTemplateComponent redisTemplateComponent;
+
+    @Resource
+    private FileService fileService;
+
+    @GetMapping("/ls")
+    public Result<ListFilesResponse> listFiles(@RequestBody SingleFileRequestDTO file, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
+        if (s == null) return Result.error(401,"登录过期，添加失败");
+        BigInteger userId = new BigInteger(s, 10);
+        if (file.getRoot() == null) file.setRoot(userId);
+        // 鉴权
+        ListFilesResponse ret = new ListFilesResponse();
+        FileBO dir = fileService.findFileBO(file.getRoot(), file.getPath());
+        ret.setChildren(fileService.listDir(dir));
+        ret.setDir(fileService.getStat(dir));
+        return Result.success(ret);
+    }
+}

@@ -15,12 +15,27 @@ import java.io.InputStream;
 import java.util.List;
 
 public class SftpAccessor implements StorageAccessor {
+    public static String getType() {
+        return "SFTP";
+    }
+
+    public static String getConnectionInfo(JSONObject args) {
+        String host = args.getString("host");
+        Integer port = args.getInteger("port");
+        String user = args.getString("user");
+        host = host == null ? "<Error>" : host;
+        port = port == null ? 22 : port;
+        user = user == null ? "<Error>" : user;
+        return String.format("%s@%s:%d", user, host, port);
+    }
+
     public static SftpAccessor createNew(JSONObject args) {
         String host = args.getString("host");
         Integer port = args.getInteger("port");
         String user = args.getString("user");
         String password = args.getString("password");
-        if (host == null || port == null) return null;
+        port = port == null ? 22 : port;
+        if (host == null) return null;
         if (user == null || password == null) return null;
         return new SftpAccessor(host, port, user, password);
     }
@@ -118,11 +133,6 @@ public class SftpAccessor implements StorageAccessor {
     }
 
     @Override
-    public void rename(String loc, String source, String dest) {
-
-    }
-
-    @Override
     public void copy(String source, String dest) {
 
     }
@@ -135,6 +145,11 @@ public class SftpAccessor implements StorageAccessor {
     @Override
     public void delete(String path) {
 
+    }
+
+    @Override
+    public boolean exists(String path) {
+        return false;
     }
 
     @Override

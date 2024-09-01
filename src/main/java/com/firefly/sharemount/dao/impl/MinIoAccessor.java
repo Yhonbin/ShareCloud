@@ -10,6 +10,20 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 
 public class MinIoAccessor implements StorageAccessor {
+    public static String getType() {
+        return "MinIO";
+    }
+
+    public static String getConnectionInfo(JSONObject args) {
+        String endpoint = args.getString("endpoint");
+        String bucket = args.getString("bucket");
+        endpoint = endpoint == null ? "<Error>" : endpoint;
+        bucket = bucket == null ? "<Error>" : bucket;
+        endpoint = endpoint.contains("://") ? "https://" + endpoint : endpoint;
+        endpoint = endpoint.endsWith("/") ? endpoint : endpoint + "/";
+        return endpoint + bucket;
+    }
+
     public static MinIoAccessor createNew(JSONObject args) {
         String endpoint = args.getString("endpoint");
         String accessKey = args.getString("accessKey");
@@ -47,6 +61,7 @@ public class MinIoAccessor implements StorageAccessor {
     @Override
     @SneakyThrows
     public void mkdir(String path, String name) {
+        lastAccessTime = System.currentTimeMillis();
         client.putObject(PutObjectArgs.builder().bucket(bucket).object(String.join("", path, "/", name, "/"))
                 .stream(new ByteArrayInputStream(new byte[]{}),0,-1).build());
     }
@@ -54,39 +69,44 @@ public class MinIoAccessor implements StorageAccessor {
     @Override
     @SneakyThrows
     public void createEmpty(String path, String name) {
+        lastAccessTime = System.currentTimeMillis();
         client.putObject(PutObjectArgs.builder().bucket(bucket).object(String.join("", path, "/", name))
                 .stream(new ByteArrayInputStream(new byte[]{}),0,-1).build());
     }
 
     @Override
     @SneakyThrows
-    public void rename(String loc, String source, String dest) {
-        client.copyObject(CopyObjectArgs.builder().bucket(bucket).object(String.join("", loc, "/", dest))
-                .source(CopySource.builder().bucket(bucket).object(String.join("", loc, "/", source)).build()).build());
-
-    }
-
-    @Override
-    @SneakyThrows
     public void copy(String source, String dest) {
+        lastAccessTime = System.currentTimeMillis();
         client.copyObject(CopyObjectArgs.builder().bucket(bucket).object(source)
                 .source(CopySource.builder().bucket(bucket).object(dest).build()).build());
 
     }
 
     @Override
+    @SneakyThrows
     public void move(String source, String dest) {
-
+        lastAccessTime = System.currentTimeMillis();
+        copy(source, dest);
+        client.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(source).build());
     }
 
     @Override
+    @SneakyThrows
     public void delete(String path) {
+        lastAccessTime = System.currentTimeMillis();
+        client.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(path).build());
+    }
 
+    @Override
+    public boolean exists(String path) {
+        return false;
     }
 
     @Override
     @SneakyThrows
     public FileStatDTO getFileStat(String path) {
+        lastAccessTime = System.currentTimeMillis();
         StatObjectResponse objectStat = client.statObject(StatObjectArgs.builder().bucket(bucket).object(path).build());
         // TODO
         return null;
@@ -95,6 +115,7 @@ public class MinIoAccessor implements StorageAccessor {
     @Override
     @SneakyThrows
     public List<FileStatDTO> listDir(String path) {
+        lastAccessTime = System.currentTimeMillis();
         return null;
     }
 
@@ -105,6 +126,6 @@ public class MinIoAccessor implements StorageAccessor {
 
     @Override
     public void close() {
-
+        client = null;
     }
 }

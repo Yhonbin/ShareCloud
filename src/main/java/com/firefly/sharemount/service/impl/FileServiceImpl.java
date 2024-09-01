@@ -1,16 +1,22 @@
 package com.firefly.sharemount.service.impl;
 
+import com.firefly.sharemount.dao.StorageAccessor;
 import com.firefly.sharemount.pojo.data.FileBO;
 import com.firefly.sharemount.mapper.*;
 import com.firefly.sharemount.pojo.data.*;
 import com.firefly.sharemount.pojo.dto.FileStatDTO;
 import com.firefly.sharemount.service.FileService;
+import com.firefly.sharemount.service.StorageService;
+import com.firefly.sharemount.service.UserService;
+import com.firefly.sharemount.utils.PathUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -29,11 +35,121 @@ public class FileServiceImpl implements FileService {
     @Resource
     private UserMapper userMapper;
 
-    private Deque<String> pathArrayToQueue(String[] path) {
-        LinkedList<String> ret = new LinkedList<>();
-        if (path.length == 0 || (path.length == 1 && path[0].isEmpty())) return ret;
-        for (String p : path) ret.offerLast(p);
+    @Resource
+    private UserService userService;
+
+    @Resource
+    private StorageService storageService;
+
+    @Override
+    public FileBO findFileBO(BigInteger id, String path) {
+        return findFileBO(userMapper.getById(id), path);
+    }
+
+    @Override
+    public FileBO findFileBO(User user, String strPath) {
+        Deque<String> path = PathUtil.pathToQueue(strPath);
+        return findFileBO(user, path);
+    }
+
+    @Override
+    public FileStatDTO getStat(FileBO file) {
+        if (file.getSymbolicLink() != null) {
+            FileStatDTO ret = new FileStatDTO();
+            ret.setType("link");
+            ret.setLinkTargetUser(userService.getUserDTO(file.getLinkOwner()));
+            String targetPath = symbolicLinkMapper.getTargetPathById(file.getSymbolicLink().getId());
+            ret.setLinkTarget(targetPath);
+            ret.setLinkTargetStat(getStat(findFileBO(file.getLinkOwner(), PathUtil.pathToQueue(targetPath))));
+            return ret;
+        }
+        FileStatDTO ret = null;
+        StorageAccessor storage = file.getStorage() == null ? null : storageService.getConnection(file.getStorage().getId());
+        if (storage != null) {
+            ret = storage.getFileStat(String.join("/", file.getStorageRestPath()));
+            ret.setMount(storageService.getStorageStat(file.getStorage()));
+        }
+        if (ret == null) {
+            ret = new FileStatDTO();
+            ret.setType("nonexistent");
+        }
+        if (file.getVfRestPath().isEmpty() && Objects.equals(ret.getType(), "nonexistent")) ret.setType("vdir");
         return ret;
+    }
+
+    @Override
+    public List<FileStatDTO> listDir(FileBO file) {
+        LinkedList<FileStatDTO> ret = new LinkedList<>();
+        try {
+            StorageAccessor storage = file.getStorage() == null ? null : storageService.getConnection(file.getStorage().getId());
+            if (storage != null) {
+                ret.addAll(storage.listDir(String.join("/", file.getStorageRestPath())));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (file.getVfRestPath().isEmpty()) {
+            List<VirtualFolder> children = fsMapper.findChildren(file.getVirtualFolder().getId());
+            for (VirtualFolder child : children) {
+                file.getVfRestPath().offerLast(child.getName());
+                ret.add(getStat(findFileBO(file.getVfOwner(), file.getVfRestPath())));
+                file.getVfRestPath().pollLast();
+            }
+        }
+        return ret;
+    }
+
+    @Override
+    public void mkdir(FileBO file, Boolean virtual) {
+        // TODO 事务
+        if (file.getStorage() == null || virtual) {
+            BigInteger parent = file.getVirtualFolder().getId();
+            for (String p : file.getVfRestPath()) {
+                fsMapper.mkdir(parent, p);
+                parent = fsMapper.getInsertId();
+            }
+        } else {
+            if (file.getStorageRestPath().isEmpty()) return;
+            StorageAccessor storage = storageService.getConnection(file.getStorage().getId());
+            String name = file.getStorageRestPath().pollLast();
+            storage.mkdir(String.join("/", file.getStorageRestPath()), name);
+            file.getStorageRestPath().offerLast(name);
+        }
+    }
+
+    @Override
+    public void createEmpty(FileBO file) {
+
+    }
+
+    @Override
+    public void copy(FileBO source, FileBO dest) {
+
+    }
+
+    @Override
+    public void move(FileBO source, FileBO dest) {
+
+    }
+
+    @Override
+    public void delete(FileBO file) {
+
+    }
+
+    @Override
+    public void mountOn(FileBO file) {
+
+    }
+
+    @Override
+    public void unmountOn(FileBO file) {
+
+    }
+
+    @Override
+    public void createSymbolicLink(FileBO file, User targetUser, String path) {
+
     }
 
     private VirtualFolder findLastVirtualFolder(VirtualFolder folder, Deque<String> path) {
@@ -70,9 +186,9 @@ public class FileServiceImpl implements FileService {
                 User targetUser = userMapper.getById(tryLink.getTargetUser());
                 if (targetUser == null)
                     return path.isEmpty() ? FileBO.makeNewInvalidSymbolicLink(tryLink, user) : null;
-                String target = symbolicLinkMapper.getTargetPathById(tryLink.getId());
                 boolean isSelfSymbolicLink = path.isEmpty();
-                Deque<String> nextPath = pathArrayToQueue(target.split("/"));
+                String target = symbolicLinkMapper.getTargetPathById(tryLink.getId());
+                Deque<String> nextPath = PathUtil.pathToQueue(target);
                 while (!path.isEmpty()) nextPath.offerLast(path.pollFirst());
                 FileBO linked = findFileBO(targetUser, nextPath);
                 if (linked == null)
@@ -89,46 +205,5 @@ public class FileServiceImpl implements FileService {
         Storage storage = storageId == null ? null : storageMapper.getById(storageId);
         sPath = storage == null ? null : sPath;
         return new FileBO(storage, sPath, folder, path, user, null, null);
-    }
-
-    @Override
-    public FileBO findFileBO(User user, String[] strPath) {
-        Deque<String> path = pathArrayToQueue(strPath);
-        return findFileBO(user, path);
-    }
-
-    @Override
-    public FileStatDTO getStat(FileBO file) {
-        return null;
-    }
-
-    @Override
-    public void mkdir(FileBO file) {
-
-    }
-
-    @Override
-    public void createEmpty(FileBO file) {
-
-    }
-
-    @Override
-    public void delete(FileBO file) {
-
-    }
-
-    @Override
-    public void mountOn(FileBO file) {
-
-    }
-
-    @Override
-    public void unmountOn(FileBO file) {
-
-    }
-
-    @Override
-    public void createSymbolicLink(FileBO file, User targetUser, String path) {
-
     }
 }

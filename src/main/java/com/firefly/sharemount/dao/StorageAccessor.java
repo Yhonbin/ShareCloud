@@ -11,13 +11,13 @@ public interface StorageAccessor {
 
     void createEmpty(String path, String name);
 
-    void rename(String loc, String source, String dest);
-
     void copy(String source, String dest);
 
     void move(String source, String dest);
 
     void delete(String path);
+
+    boolean exists(String path);
 
     FileStatDTO getFileStat(String path);
 

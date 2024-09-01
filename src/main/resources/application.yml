@@ -3,8 +3,8 @@ spring:
   redis:
     host: ${REDIS_URL:localhost}
     port: ${REDIS_PORT:6379}
-    #username: ${REDIS_USERNAME:default}
-    password: ${REDIS_PASSWROD:635123}
+    username: ${REDIS_USERNAME:default}
+    password: ${REDIS_PASSWORD:635123}
     database: ${REDIS_DATABASE:0}
     lettuce:
       pool:
@@ -23,7 +23,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL:jdbc:mysql://localhost:3306/sharemount?createDatabaseIfNotExist=true}
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWROD:635123}
+    password: ${DB_PASSWORD:635123}
   #文件上传的配置
   servlet:
     multipart:

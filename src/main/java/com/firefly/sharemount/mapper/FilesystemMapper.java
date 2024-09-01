@@ -21,8 +21,11 @@ public interface FilesystemMapper {
     @Update("UPDATE filesystem SET is_deleted = 1 WHERE id = #{id}")
     void deleteById(@Param("id") BigInteger id);
 
-    @Insert("INSERT INTO filesystem(name, parent) VALUES(#{fileName},null)")
-    void addFilesystem(@Param("fileName") String fileName);
+    @Insert("INSERT INTO filesystem(name, parent) VALUES(#{fileName}, null)")
+    void addUserRoot(@Param("fileName") String fileName);
+
+    @Insert("INSERT INTO filesystem(name, parent) VALUES(#{dirName}, #{parent}")
+    void mkdir(@Param("parent") BigInteger parent, @Param("dirName") String dirName);
 
     @Select("SELECT LAST_INSERT_ID()")
     BigInteger getInsertId();
