@@ -15,6 +15,7 @@ public class CorsInterceptor implements HandlerInterceptor {
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"); // 允许的请求方法
         response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization"); // 允许的请求头
         response.setHeader("Access-Control-Allow-Credentials", "true"); // 是否允许发送Cookie
+        response.setHeader("Access-Control-Allow-Credentials", "true");
         return true;
     }
 }
