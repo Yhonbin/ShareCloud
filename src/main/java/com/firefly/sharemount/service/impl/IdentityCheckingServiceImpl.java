@@ -35,7 +35,7 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
         MimeMessage mimeMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
         String code = VerifyingCodeUtil.generateVerifyCode(6);
-        helper.setText("<p style='color: blue'>你正在注册共享云盘服务，你的验证码为："+ code +"（有效期为一分钟）</p>",true);
+        helper.setText("<p style='color: blue'>你正在注册共享云盘服务，你的验证码为："+ code +"（有效期为三分钟）</p>",true);
         helper.setSubject("sharemount--验证码");
         helper.setTo(email);
         // 获取验证码
@@ -44,12 +44,15 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
         redisTemplateComponent.set(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),code);
         redisTemplateComponent.setExpire(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),TIME_OUT_SECOND* 3L);
         mailSender.send(mimeMessage);
-        //todo
+
     }
 
     @Override
     public boolean checkEmailCode(String email, String code) {
         String catchCode = redisTemplateComponent.get(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));
+        System.err.println(catchCode);
+        System.err.println(code);
+
         if (catchCode != null && catchCode.equals(code)) {
             // 销毁验证码
             redisTemplateComponent.remove(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));

@@ -17,11 +17,12 @@ public interface UserInfoService {
 
     boolean exitGroup(BigInteger userId, BigInteger groupId);
 
+    boolean deleteGroup(BigInteger userId, BigInteger groupId);
+
     UserInfo findByUserPhoneNumber(String loginName);
 
     UserInfo findByUserEmail(String loginName);
     UserInfo findByUserId(BigInteger userId);
-
 
 
 }

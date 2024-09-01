@@ -99,6 +99,11 @@ public class UserInfoServiceImpl implements UserInfoService {
         return true;
     }
 
+    @Override
+    public boolean deleteGroup(BigInteger userId, BigInteger groupId) {
+        return false;
+    }
+
 
     @Override
     public UserInfo findByUserPhoneNumber(String loginName) {

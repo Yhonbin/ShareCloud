@@ -30,13 +30,10 @@ public class RegisterDTO {
 
     @ApiModelProperty(value = "验证方式", required = true, example = "asbc@qq.com")
     @NotNull(message = "验证方式不能为空")
-    private String verifyNumber;
+    private String email;
 
     @NotNull(message = "验证码不能为空")
-    @Length(min = 6, max = 6, message = "验证码长度为6位")
-    private String verification;
-
-
+    private String verificationCode;
 
 
 }

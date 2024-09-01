@@ -60,7 +60,7 @@ public class UserController {
     public Result<Object> register(@RequestBody RegisterDTO registerDto) {
         String username = registerDto.getUsername();
         String password = registerDto.getPassword();
-        String verifyNumber= registerDto.getVerifyNumber();
+        String verifyNumber= registerDto.getEmail();
         String email = null, phoneNumber = null;
         if (!RegexUtil.isEmailInvalid(verifyNumber)) {
             email = verifyNumber;
@@ -68,7 +68,7 @@ public class UserController {
             phoneNumber = verifyNumber;
         }
         User user = userService.findByName(username);
-        String verification = registerDto.getVerification();
+        String verification = registerDto.getVerificationCode();
         if (!identityCheckingService.checkEmailCode(verifyNumber,verification)) {
             return Result.error(401,"验证码错误");
         }
@@ -152,5 +152,15 @@ public class UserController {
             return Result.error(404, "退出失败 您已不在该小组");
         }
         return Result.success();
+    }
+
+    @DeleteMapping("/participation/{groupId}")
+    public Result<Object> deleteGroup(@PathVariable BigInteger groupId, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        if (groupId == null) {
+            return Result.error(401,"删除失败 请先确定要删除的小组信息");
+        }
+        BigInteger userId = new BigInteger(redisTemplateComponent.get("SESSION:USER:" + session.getId()));
+        return Result.error(501,"未实现");
     }
 }
