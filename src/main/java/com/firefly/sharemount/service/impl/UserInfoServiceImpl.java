@@ -77,10 +77,31 @@ public class UserInfoServiceImpl implements UserInfoService {
     }
 
     @Transactional
-    public void joinGroup(BigInteger userId, BigInteger groupId) {
+    @Override
+    public boolean joinGroup(BigInteger userId, BigInteger groupId) {
         // 在participation中插入新项，设user_id=用户ID，group_id=user新项主键
+        User group = userMapper.getById(groupId);
+        if (group == null) {
+            return false;
+        }
         Integer privilege = 0;
         participationMapper.addGroup(userId,groupId,privilege);
+        return true;
+    }
+
+    @Override
+    public boolean exitGroup(BigInteger userId, BigInteger groupId) {
+
+        if (participationMapper.findByGroupId(userId, groupId) == 0) {
+            return false;
+        }
+        participationMapper.exitGroup(userId,groupId);
+        return true;
+    }
+
+    @Override
+    public boolean deleteGroup(BigInteger userId, BigInteger groupId) {
+        return false;
     }
 
 

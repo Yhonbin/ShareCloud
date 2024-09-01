@@ -15,10 +15,8 @@ import com.firefly.sharemount.utils.RegexUtil;
 import com.firefly.sharemount.utils.Sha256Util;
 import io.swagger.annotations.Api;
 import lombok.val;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
@@ -62,7 +60,7 @@ public class UserController {
     public Result<Object> register(@RequestBody RegisterDTO registerDto) {
         String username = registerDto.getUsername();
         String password = registerDto.getPassword();
-        String verifyNumber= registerDto.getVerifyNumber();
+        String verifyNumber= registerDto.getEmail();
         String email = null, phoneNumber = null;
         if (!RegexUtil.isEmailInvalid(verifyNumber)) {
             email = verifyNumber;
@@ -70,7 +68,7 @@ public class UserController {
             phoneNumber = verifyNumber;
         }
         User user = userService.findByName(username);
-        String verification = registerDto.getVerification();
+        String verification = registerDto.getVerificationCode();
         if (!identityCheckingService.checkEmailCode(verifyNumber,verification)) {
             return Result.error(401,"验证码错误");
         }
@@ -85,9 +83,12 @@ public class UserController {
 
     @PostMapping("/login")
     public Result<Object> login(@RequestBody LoginDTO loginDTO, HttpSession httpSession) {
-        String loginName = loginDTO.getUserLoginName();
+        String loginName = loginDTO.getUsername();
         String password = loginDTO.getPassword();
         UserInfo userInfo;
+        if (loginName == null || password == null) {
+            return Result.error(403, "请输入用户名和密码");
+        }
         if (!RegexUtil.isPhoneInvalid(loginName)) {
             userInfo = userInfoService.findByUserPhoneNumber(loginName);
         } else if (!RegexUtil.isEmailInvalid(loginName)) {
@@ -127,4 +128,39 @@ public class UserController {
         return Result.success(userGroup);
     }
 
+    @PostMapping("/join-group/{groupId}")
+    public Result<Object> joinGroup(@PathVariable BigInteger groupId, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        BigInteger userId = new BigInteger(redisTemplateComponent.get("SESSION:USER:" + session.getId()));
+        if (groupId == null) {
+            return Result.error(401,"添加失败 请先输入要添加的小组信息");
+        }
+        if (!userInfoService.joinGroup(userId,groupId)) {
+            return Result.error(404,"添加失败 您输入的小组不存在");
+        }
+        return Result.success();
+    }
+
+    @DeleteMapping("/exit-group/{groupId}")
+    public Result<Object> exitGroup(@PathVariable BigInteger groupId,HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        if (groupId == null) {
+            return Result.error(401,"退出失败 请先输入要退出的小组信息");
+        }
+        BigInteger userId = new BigInteger(redisTemplateComponent.get("SESSION:USER:" + session.getId()));
+        if (!userInfoService.exitGroup(userId, groupId)) {
+            return Result.error(404, "退出失败 您已不在该小组");
+        }
+        return Result.success();
+    }
+
+    @DeleteMapping("/participation/{groupId}")
+    public Result<Object> deleteGroup(@PathVariable BigInteger groupId, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        if (groupId == null) {
+            return Result.error(401,"删除失败 请先确定要删除的小组信息");
+        }
+        BigInteger userId = new BigInteger(redisTemplateComponent.get("SESSION:USER:" + session.getId()));
+        return Result.error(501,"未实现");
+    }
 }

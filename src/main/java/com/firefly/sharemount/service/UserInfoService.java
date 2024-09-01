@@ -13,9 +13,16 @@ public interface UserInfoService {
 
     User createGroup(BigInteger userId, String groupName);
 
+    boolean joinGroup(BigInteger userId, BigInteger groupId);
+
+    boolean exitGroup(BigInteger userId, BigInteger groupId);
+
+    boolean deleteGroup(BigInteger userId, BigInteger groupId);
+
     UserInfo findByUserPhoneNumber(String loginName);
 
     UserInfo findByUserEmail(String loginName);
     UserInfo findByUserId(BigInteger userId);
+
 
 }
