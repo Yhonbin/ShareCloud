@@ -26,7 +26,7 @@ public interface FileService {
 
     List<FileStatDTO> listDir(FileBO file);
 
-    void mountOn(FileBO file);
+    void mountOn(FileBO file, BigInteger storageId);
 
     void unmountOn(FileBO file);
 

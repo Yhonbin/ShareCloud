@@ -24,7 +24,7 @@ public class RegisterDTO {
     private String username;
 
     @ApiModelProperty(value = "密码", required = true, example = "toor")
-    @Pattern(regexp = "^[0-9a-zA-Z_]+$",message = "密码只能由汉字、数字、英文字母或下划线组成")
+    @Pattern(regexp = "^[0-9a-zA-Z_]+$",message = "密码只能由数字、英文字母或下划线组成")
     @Length(min = 5, max = 16)
     private String password;
 

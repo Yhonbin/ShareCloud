@@ -10,10 +10,13 @@ import com.firefly.sharemount.dao.impl.MinIoAccessor;
 import com.firefly.sharemount.dao.impl.SftpAccessor;
 import com.firefly.sharemount.mapper.StorageMapper;
 import com.firefly.sharemount.pojo.data.Storage;
+import com.firefly.sharemount.pojo.dto.StorageDTO;
 import com.firefly.sharemount.pojo.dto.StorageStatDTO;
 import com.firefly.sharemount.service.StorageService;
 import com.firefly.sharemount.service.UserService;
+import io.swagger.models.auth.In;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
@@ -62,6 +65,24 @@ public class StorageServiceImpl implements StorageService {
         int retry = retryObj instanceof Integer ? (Integer) retryObj : 0;
         if (connection != null) connections.put(id, new StorageAccessorRetryProxy(connection, retry));
         return connection;
+    }
+
+    @Override
+    @Transactional
+    public void uploadStorage(StorageDTO storageDto) {
+        storageMapper.uploadStorage(storageDto);
+        BigInteger id = storageMapper.getInsertId();
+        storageMapper.uploadStorageInterface(id, storageDto);
+    }
+
+    @Override
+    public void transferToGroup(BigInteger owner, BigInteger groupId) {
+       storageMapper.transferToGroup(owner, groupId);
+    }
+
+    @Override
+    public BigInteger getOwnerById(BigInteger storageId) {
+        return storageMapper.getById(storageId).getOwner();
     }
 
     private StorageAccessor makeConnection(Boolean isReadOnly, JSONObject config) {

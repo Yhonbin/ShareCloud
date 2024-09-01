@@ -18,4 +18,8 @@ public interface ParticipationMapper {
 
     @Update("UPDATE participation SET is_deleted = 1 WHERE user_id = #{userId} AND group_id = #{groupId}")
     void exitGroup(@Param("userId") BigInteger userId, @Param("groupId") BigInteger groupId);
+
+
+    @Select("SELECT privilege FROM participation WHERE user_id = #{userId} AND group_id = #{groupId} AND is_deleted = 0")
+    Integer getPrivilegeById(@Param("userId") BigInteger userId, @Param("groupId") BigInteger groupId);
 }

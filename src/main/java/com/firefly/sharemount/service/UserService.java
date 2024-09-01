@@ -13,4 +13,6 @@ public interface UserService {
     UserDTO getUserDTO(User user);
 
     UserDTO getUserDTO(BigInteger id);
+
+    boolean isGroup(BigInteger userId);
 }

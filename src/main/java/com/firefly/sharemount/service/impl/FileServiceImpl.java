@@ -138,8 +138,8 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void mountOn(FileBO file) {
-
+    public void mountOn(FileBO file, BigInteger storageId) {
+        // 挂载
     }
 
     @Override

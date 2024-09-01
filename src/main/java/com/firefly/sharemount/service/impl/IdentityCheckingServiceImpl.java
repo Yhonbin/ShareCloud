@@ -50,9 +50,6 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
     @Override
     public boolean checkEmailCode(String email, String code) {
         String catchCode = redisTemplateComponent.get(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));
-        System.err.println(catchCode);
-        System.err.println(code);
-
         if (catchCode != null && catchCode.equals(code)) {
             // 销毁验证码
             redisTemplateComponent.remove(String.format(REDIS_EMAIL_VERIFICATION_FORMAT, email));

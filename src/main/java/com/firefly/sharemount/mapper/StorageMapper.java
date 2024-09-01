@@ -2,10 +2,8 @@ package com.firefly.sharemount.mapper;
 
 import com.firefly.sharemount.pojo.data.Storage;
 import com.firefly.sharemount.pojo.data.StorageConnectionLog;
-import org.apache.ibatis.annotations.CacheNamespace;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import com.firefly.sharemount.pojo.dto.StorageDTO;
+import org.apache.ibatis.annotations.*;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -25,4 +23,18 @@ public interface StorageMapper {
             "LEFT JOIN storage s ON sl.id = #{id} AND s.id = #{id} " +
             "WHERE s.is_deleted = 0")
     StorageConnectionLog getLogById(@Param("id") BigInteger id);
+
+
+    @Insert("INSERT INTO storage(owner,name, occupation, readonly)" +
+            "VALUES (#{owner},#{name},#{occupation}, #{readonly})")
+    void uploadStorage(@Param("storageDto")StorageDTO storageDto);
+
+    @Select("SELECT LAST_INSERT_ID()")
+    BigInteger getInsertId();
+
+    @Insert("INSERT INTO storage_interface(id, interface) VALUES (#{id},#{storageInterface})")
+    void uploadStorageInterface(@Param("id") BigInteger id,@Param("storageDto") StorageDTO storageDto);
+
+    @Update("UPDATE storage SET owner = #{groupId} WHERE is_deleted = 0 AND owner = #{owner}")
+    void transferToGroup(@Param("owner") BigInteger owner, @Param("groupId") BigInteger groupId);
 }

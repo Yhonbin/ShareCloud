@@ -25,7 +25,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws IOException {
         HttpSession httpSession = request.getSession();
         System.err.println(httpSession.getId());
-        String catchUuid = redisTemplateComponent.get("SESSION:UUID:" + httpSession.getId());
+        String catchUuid = redisTemplateComponent.get("ShareMount:UUID:" + httpSession.getId());
         System.out.println(catchUuid);
         if (catchUuid == null) {
             response.setStatus(401);

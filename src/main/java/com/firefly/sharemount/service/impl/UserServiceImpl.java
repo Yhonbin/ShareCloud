@@ -3,6 +3,7 @@ package com.firefly.sharemount.service.impl;
 import com.firefly.sharemount.mapper.UserInfoMapper;
 import com.firefly.sharemount.mapper.UserMapper;
 import com.firefly.sharemount.pojo.data.User;
+import com.firefly.sharemount.pojo.data.UserInfo;
 import com.firefly.sharemount.pojo.dto.UserDTO;
 import com.firefly.sharemount.service.UserService;
 import org.springframework.stereotype.Service;
@@ -35,5 +36,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUserDTO(BigInteger id) {
         return getUserDTO(userMapper.getById(id));
+    }
+
+    @Override
+    public boolean isGroup(BigInteger userId) {
+        UserInfo userInfo = userInfoMapper.findByUserId(userId);
+        return userInfo == null;
     }
 }
