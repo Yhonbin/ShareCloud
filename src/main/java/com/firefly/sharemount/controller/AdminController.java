@@ -1,5 +1,6 @@
 package com.firefly.sharemount.controller;
 
+import com.firefly.sharemount.config.ApplicationConfiguration;
 import com.firefly.sharemount.pojo.data.Result;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,15 +13,16 @@ import javax.annotation.Resource;
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
-    /*
+
+
     @Resource
-    private AdminService adminService;
+    private ApplicationConfiguration applicationConfiguration;
 
     @PutMapping("/allocated")
     public Result<Object> updateAllocation(@RequestParam Integer newAllocation) {
-        adminService.updateStorageAllocation(newAllocation);
+        applicationConfiguration.loadConfig();
+        applicationConfiguration.updateNestedConfig("cloud-drive.default-allocation",newAllocation);
         return Result.success();
     }
 
-     */
 }

@@ -1,14 +1,12 @@
 package com.firefly.sharemount.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.math.BigInteger;
 import java.util.List;
 
 @Mapper
+@CacheNamespace
 public interface MountMapper {
     @Select("SELECT storage_id FROM mount  WHERE path = #{id} AND is_deleted = 0 LIMIT 1")
     BigInteger findByPathId(@Param("id") BigInteger id);

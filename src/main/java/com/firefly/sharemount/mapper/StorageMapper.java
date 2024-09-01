@@ -2,6 +2,7 @@ package com.firefly.sharemount.mapper;
 
 import com.firefly.sharemount.pojo.data.Storage;
 import com.firefly.sharemount.pojo.data.StorageConnectionLog;
+import org.apache.ibatis.annotations.CacheNamespace;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -10,6 +11,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Mapper
+@CacheNamespace
 public interface StorageMapper {
     @Select("SELECT * FROM storage WHERE id = #{id} AND is_deleted = 0")
     Storage getById(@Param("id") BigInteger id);

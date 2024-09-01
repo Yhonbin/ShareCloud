@@ -1,14 +1,12 @@
 package com.firefly.sharemount.mapper;
 
 import com.firefly.sharemount.pojo.data.UserInfo;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.math.BigInteger;
 
 @Mapper
+@CacheNamespace
 public interface UserInfoMapper {
     @Select("SELECT * FROM user_info WHERE email = #{email} AND is_deleted = 0")
     UserInfo findByUserEmail(@Param("email") String email);

@@ -5,12 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.math.BigInteger;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class SymbolicLink {
+public class SymbolicLink implements Serializable {
     @NotNull
     private BigInteger id;
 

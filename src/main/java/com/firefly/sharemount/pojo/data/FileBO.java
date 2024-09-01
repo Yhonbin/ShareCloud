@@ -3,11 +3,12 @@ package com.firefly.sharemount.pojo.data;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Deque;
 
 @Data
 @AllArgsConstructor
-public class FileBO {
+public class FileBO implements Serializable {
     public static FileBO makeNewInvalidSymbolicLink(SymbolicLink symbolicLink, User owner) {
         return new FileBO(null, null, null, null, null, symbolicLink, owner);
     }

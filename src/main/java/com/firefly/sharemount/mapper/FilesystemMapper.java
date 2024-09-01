@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 @Mapper
+@CacheNamespace
 public interface FilesystemMapper {
     @Select("SELECT * FROM filesystem WHERE id = #{id} AND is_deleted = 0")
     VirtualFolder getById(@Param("id") BigInteger id);

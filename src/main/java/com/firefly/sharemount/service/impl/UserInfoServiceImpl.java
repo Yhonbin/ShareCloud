@@ -76,6 +76,14 @@ public class UserInfoServiceImpl implements UserInfoService {
         return new User(groupId,groupName,root);
     }
 
+    @Transactional
+    public void joinGroup(BigInteger userId, BigInteger groupId) {
+        // 在participation中插入新项，设user_id=用户ID，group_id=user新项主键
+        Integer privilege = 0;
+        participationMapper.addGroup(userId,groupId,privilege);
+    }
+
+
     @Override
     public UserInfo findByUserPhoneNumber(String loginName) {
         return userInfoMapper.findByUserPhoneNumber(loginName);

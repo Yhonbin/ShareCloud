@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.*;
 import java.math.BigInteger;
 
 @Mapper
+@CacheNamespace
 public interface UserMapper {
     @Select("SELECT * FROM user WHERE id = #{id} AND is_deleted = 0")
     User getById(@Param("id") BigInteger id);

@@ -1,15 +1,13 @@
 package com.firefly.sharemount.mapper;
 
 import com.firefly.sharemount.pojo.data.SymbolicLink;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.math.BigInteger;
 import java.util.List;
 
 @Mapper
+@CacheNamespace
 public interface SymbolicLinkMapper {
     @Select("SELECT * FROM symbolic_link WHERE id = #{id} AND is_deleted = 0")
     SymbolicLink getById(@Param("id") BigInteger id);
