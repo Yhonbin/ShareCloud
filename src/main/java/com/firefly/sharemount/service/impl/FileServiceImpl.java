@@ -79,6 +79,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
     public List<FileStatDTO> listDir(FileBO file) {
         LinkedList<FileStatDTO> ret = new LinkedList<>();
         try {

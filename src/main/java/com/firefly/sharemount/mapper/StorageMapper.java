@@ -27,7 +27,7 @@ public interface StorageMapper {
 
     @Insert("INSERT INTO storage(owner,name, occupation, readonly)" +
             "VALUES (#{owner},#{name},#{occupation}, #{readonly})")
-    void uploadStorage(@Param("storageDto")StorageDTO storageDto);
+    void uploadStorage(StorageDTO storageDto);
 
     @Select("SELECT LAST_INSERT_ID()")
     BigInteger getInsertId();

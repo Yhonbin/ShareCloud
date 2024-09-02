@@ -10,6 +10,7 @@ import com.firefly.sharemount.pojo.dto.SingleFileRequestDTO;
 import com.firefly.sharemount.service.FileService;
 import com.firefly.sharemount.service.UserService;
 import io.swagger.annotations.Api;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
