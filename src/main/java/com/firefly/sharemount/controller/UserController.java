@@ -50,10 +50,10 @@ public class UserController {
     public Result<Object> sendEmailCode(@RequestBody JSONObject jsonObject) throws MessagingException {
         String email = jsonObject.getString("account");
         if (RegexUtil.isEmailInvalid(email)) {
-            return Result.error(404,"邮箱格式错误");
+            return Result.error(404, "邮箱格式错误");
         }
         UserInfo userInfo = userInfoService.findByUserEmail(email);
-        if (userInfo != null) return Result.error(401,"该邮箱已注册，请更改邮箱");
+        if (userInfo != null) return Result.error(401, "该邮箱已注册，请更改邮箱");
         identityCheckingService.sendEmailCode(email);
         return Result.success();
     }
@@ -62,7 +62,7 @@ public class UserController {
     public Result<Object> register(@RequestBody RegisterDTO registerDto) {
         String username = registerDto.getUsername();
         String password = registerDto.getPassword();
-        String verifyNumber= registerDto.getEmail();
+        String verifyNumber = registerDto.getEmail();
         String email = null, phoneNumber = null;
         if (!RegexUtil.isEmailInvalid(verifyNumber)) {
             email = verifyNumber;
@@ -71,20 +71,20 @@ public class UserController {
         }
         User user = userService.findByName(username);
         String verification = registerDto.getVerificationCode();
-        if (!identityCheckingService.checkEmailCode(verifyNumber,verification)) {
-            return Result.error(401,"验证码错误");
+        if (!identityCheckingService.checkEmailCode(verifyNumber, verification)) {
+            return Result.error(401, "验证码错误");
         }
         if (user == null) {
-            user = userInfoService.register(username,email,phoneNumber,password);
+            user = userInfoService.register(username, email, phoneNumber, password);
         } else {
-            return Result.error(409,"该用户名已存在");
+            return Result.error(409, "该用户名已存在");
         }
 
         return Result.success(user);
     }
 
     @PostMapping("/login")
-    public Result<Object> login(@RequestBody LoginDTO loginDTO, HttpSession httpSession) {
+    public Result<JSONObject> login(@RequestBody LoginDTO loginDTO, HttpSession httpSession) {
         String loginName = loginDTO.getUsername();
         String password = loginDTO.getPassword();
         UserInfo userInfo;
@@ -112,11 +112,14 @@ public class UserController {
         UUID key = UUID.randomUUID();
         httpSession.setAttribute("UUID", key);
         redisTemplateComponent.set("ShareMount:UUID:" + httpSession.getId(), key.toString());
-        redisTemplateComponent.setExpire("ShareMount:UUID:" + httpSession.getId(),TIME_OUT_MINUTE-1, TimeUnit.MINUTES);
+        redisTemplateComponent.setExpire("ShareMount:UUID:" + httpSession.getId(), TIME_OUT_MINUTE - 1, TimeUnit.MINUTES);
 
         redisTemplateComponent.set("ShareMount:USER:" + httpSession.getId(), userInfo.getUserId().toString());
-        redisTemplateComponent.setExpire("ShareMount:USER:" + httpSession.getId(),TIME_OUT_MINUTE,TimeUnit.MINUTES);
-        return Result.success();
+        redisTemplateComponent.setExpire("ShareMount:USER:" + httpSession.getId(), TIME_OUT_MINUTE, TimeUnit.MINUTES);
+        String token = key.toString();
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("token", token);
+        return Result.success(jsonObject);
     }
 
     @PostMapping("/participation")
@@ -125,7 +128,7 @@ public class UserController {
         BigInteger userId = userService.getUserId(session);
 
         String groupName = jsonObject.get("group").toString();
-        User userGroup = userInfoService.createGroup(userId,groupName);
+        User userGroup = userInfoService.createGroup(userId, groupName);
         return Result.success(userGroup);
     }
 
@@ -135,8 +138,11 @@ public class UserController {
         BigInteger userId = userService.getUserId(session);
         UserInfo userInfo = userInfoService.getUserInfo(userId);
         UserDTO userDTO = userService.getUserDTO(userId);
-        JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(userInfo));
-        jsonObject.put("name",userDTO.getName());
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id",userInfo.getUserId());
+        jsonObject.put("name", userDTO.getName());
+        jsonObject.put("email",userInfo.getEmail());
+        jsonObject.put("allocated",userInfo.getAllocated());
         return Result.success(jsonObject);
     }
 
@@ -145,19 +151,19 @@ public class UserController {
         HttpSession session = request.getSession();
         BigInteger userId = userService.getUserId(session);
         if (groupId == null) {
-            return Result.error(401,"添加失败 请先输入要添加的小组信息");
+            return Result.error(401, "添加失败 请先输入要添加的小组信息");
         }
-        if (!userInfoService.joinGroup(userId,groupId)) {
-            return Result.error(404,"添加失败 您输入的小组不存在");
+        if (!userInfoService.joinGroup(userId, groupId)) {
+            return Result.error(404, "添加失败 您输入的小组不存在");
         }
         return Result.success();
     }
 
     @DeleteMapping("/exit-group/{groupId}")
-    public Result<Object> exitGroup(@PathVariable BigInteger groupId,HttpServletRequest request) {
+    public Result<Object> exitGroup(@PathVariable BigInteger groupId, HttpServletRequest request) {
         HttpSession session = request.getSession();
         if (groupId == null) {
-            return Result.error(401,"退出失败 请先输入要退出的小组信息");
+            return Result.error(401, "退出失败 请先输入要退出的小组信息");
         }
         BigInteger userId = userService.getUserId(session);
         if (!userInfoService.exitGroup(userId, groupId)) {
@@ -170,9 +176,9 @@ public class UserController {
     public Result<Object> deleteGroup(@PathVariable BigInteger groupId, HttpServletRequest request) {
         HttpSession session = request.getSession();
         if (groupId == null) {
-            return Result.error(401,"删除失败 请先确定要删除的小组信息");
+            return Result.error(401, "删除失败 请先确定要删除的小组信息");
         }
         BigInteger userId = userService.getUserId(session);
-        return Result.error(501,"未实现");
+        return Result.error(501, "未实现");
     }
 }
