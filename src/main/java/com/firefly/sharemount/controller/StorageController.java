@@ -1,17 +1,13 @@
 package com.firefly.sharemount.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.firefly.sharemount.component.RedisTemplateComponent;
-import com.firefly.sharemount.mapper.ParticipationMapper;
 import com.firefly.sharemount.pojo.data.Result;
-import com.firefly.sharemount.pojo.data.Storage;
 import com.firefly.sharemount.pojo.dto.StorageDTO;
 import com.firefly.sharemount.service.ParticipationService;
 import com.firefly.sharemount.service.StorageService;
 import com.firefly.sharemount.service.UserService;
 import io.swagger.annotations.Api;
-import jdk.jfr.internal.consumer.OngoingStream;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

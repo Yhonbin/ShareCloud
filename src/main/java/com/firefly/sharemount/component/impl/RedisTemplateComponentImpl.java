@@ -1,9 +1,7 @@
 package com.firefly.sharemount.component.impl;
 
 import com.firefly.sharemount.component.RedisTemplateComponent;
-import com.sun.tools.javac.code.Attribute;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

@@ -55,8 +55,13 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public FileStatDTO getStat(FileBO file) {
+        return getStat(file, false);
+    }
+
+    public FileStatDTO getStat(FileBO file, boolean ignoreStorage) {
         if (file.getSymbolicLink() != null) {
             FileStatDTO ret = new FileStatDTO();
+            ret.setName(file.getSymbolicLink().getName());
             ret.setType("link");
             ret.setLinkTargetUser(userService.getUserDTO(file.getLinkOwner()));
             String targetPath = symbolicLinkMapper.getTargetPathById(file.getSymbolicLink().getId());
@@ -68,18 +73,21 @@ public class FileServiceImpl implements FileService {
         StorageAccessor storage = file.getStorage() == null ? null : storageService.getConnection(file.getStorage().getId());
         if (storage != null) {
             ret = storage.getFileStat(String.join("/", file.getStorageRestPath()));
-            ret.setMount(storageService.getStorageStat(file.getStorage()));
+            if (!ignoreStorage) ret.setMount(storageService.getStorageStat(file.getStorage()));
         }
         if (ret == null) {
             ret = new FileStatDTO();
             ret.setType("nonexistent");
         }
-        if (file.getVfRestPath().isEmpty() && Objects.equals(ret.getType(), "nonexistent")) ret.setType("vdir");
+        if (file.getVfRestPath().isEmpty() && Objects.equals(ret.getType(), "nonexistent")) {
+            ret.setName(file.getVirtualFolder().getName());
+            ret.setType("vdir");
+        }
         return ret;
     }
 
     @Override
-    public List<FileStatDTO> listDir(FileBO file) {
+    public List<FileStatDTO> listDir(FileBO file, BigInteger ignoreStorageId) {
         LinkedList<FileStatDTO> ret = new LinkedList<>();
         try {
             StorageAccessor storage = file.getStorage() == null ? null : storageService.getConnection(file.getStorage().getId());
@@ -93,7 +101,8 @@ public class FileServiceImpl implements FileService {
             List<VirtualFolder> children = fsMapper.findChildren(file.getVirtualFolder().getId());
             for (VirtualFolder child : children) {
                 file.getVfRestPath().offerLast(child.getName());
-                ret.add(getStat(findFileBO(file.getVfOwner(), file.getVfRestPath())));
+                FileBO bo = findFileBO(file.getVfOwner(), file.getVfRestPath());
+                ret.add(getStat(bo, bo.getStorage() != null && bo.getStorage().getId().equals(ignoreStorageId)));
                 file.getVfRestPath().pollLast();
             }
         }
@@ -174,15 +183,24 @@ public class FileServiceImpl implements FileService {
     private VirtualFolder findLastVirtualFolder(VirtualFolder folder, Deque<String> path) {
         if (path.isEmpty()) return folder;
         String nextName = path.pollFirst();
-        if (path.isEmpty() && nextName.isEmpty()) return folder;
+        if (path.isEmpty() && nextName.isEmpty()) {
+            path.offerFirst(nextName);
+            return folder;
+        }
         do {
             VirtualFolder nextFolder = fsMapper.findChildByName(folder.getId(), nextName);
-            if (nextFolder == null) return folder;
+            if (nextFolder == null) {
+                path.offerFirst(nextName);
+                return folder;
+            }
             folder = nextFolder;
             nextName = path.pollFirst();
         } while (!path.isEmpty());
         VirtualFolder fin = fsMapper.findChildByName(folder.getId(), nextName);
-        return fin == null ? folder : fin;
+        if (fin == null) {
+            path.offerFirst(nextName);
+            return folder;
+        } else return fin;
     }
 
     private BigInteger findLastStorageId(VirtualFolder folder, Deque<String> path) {
