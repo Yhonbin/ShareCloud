@@ -120,5 +120,10 @@ public class UserInfoServiceImpl implements UserInfoService {
         return userInfoMapper.findByUserId(userId);
     }
 
+    @Override
+    public UserInfo getUserInfo(BigInteger userId) {
+        return userInfoMapper.findByUserId(userId);
+    }
+
 
 }

@@ -8,6 +8,7 @@ import com.firefly.sharemount.pojo.dto.RegisterDTO;
 import com.firefly.sharemount.pojo.data.Result;
 import com.firefly.sharemount.pojo.data.User;
 import com.firefly.sharemount.pojo.data.UserInfo;
+import com.firefly.sharemount.pojo.dto.UserDTO;
 import com.firefly.sharemount.service.IdentityCheckingService;
 import com.firefly.sharemount.service.UserInfoService;
 import com.firefly.sharemount.service.UserService;
@@ -126,6 +127,17 @@ public class UserController {
         String groupName = jsonObject.get("group").toString();
         User userGroup = userInfoService.createGroup(userId,groupName);
         return Result.success(userGroup);
+    }
+
+    @GetMapping("/userinfo")
+    public Result<Object> getUserInfo(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        BigInteger userId = userService.getUserId(session);
+        UserInfo userInfo = userInfoService.getUserInfo(userId);
+        UserDTO userDTO = userService.getUserDTO(userId);
+        JSONObject jsonObject = JSONObject.parseObject(JSON.toJSONString(userInfo));
+        jsonObject.put("name",userDTO.getName());
+        return Result.success(jsonObject);
     }
 
     @PostMapping("/join-group/{groupId}")

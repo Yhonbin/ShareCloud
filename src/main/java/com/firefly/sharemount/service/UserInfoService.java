@@ -25,4 +25,5 @@ public interface UserInfoService {
     UserInfo findByUserId(BigInteger userId);
 
 
+    UserInfo getUserInfo(BigInteger userId);
 }
