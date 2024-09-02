@@ -28,8 +28,8 @@ public class FileController {
 
     @GetMapping("/ls")
     public Result<ListFilesResponseDTO> listFiles(@RequestBody SingleFileRequestDTO file, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        BigInteger userId = userService.getUserId(session);
+
+        BigInteger userId = userService.getUserId(request);
         if (file.getRoot() == null) file.setRoot(userId);
         // 鉴权
         ListFilesResponseDTO ret = new ListFilesResponseDTO();
@@ -42,8 +42,7 @@ public class FileController {
 
     @PostMapping("/mkdir")
     public Result<Object> makeDir(@RequestBody MkdirRequestDTO dirPath, HttpServletRequest request) {
-        HttpSession session = request.getSession();
-        BigInteger userId = userService.getUserId(session);
+        BigInteger userId = userService.getUserId(request);
         if (dirPath.getRoot() == null) dirPath.setRoot(userId);
         FileBO dir = fileService.findFileBO(dirPath.getRoot(),dirPath.getPath());
         System.out.printf("[%s] File operation: mkdir %s%n", new Date(), dir.toString());

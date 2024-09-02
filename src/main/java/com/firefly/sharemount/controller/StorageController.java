@@ -38,12 +38,20 @@ public class StorageController {
     @PostMapping("/upload")
     public Result<Object> uploadStorage(@RequestBody StorageDTO storageDto, HttpServletRequest request) {
 
-        HttpSession session = request.getSession();
-        BigInteger owner =  userService.getUserId(session);
+        BigInteger owner =  userService.getUserId(request);
         storageDto.setOwner(owner);
         storageService.uploadStorage(storageDto);
         return Result.success();
     }
+
+    @DeleteMapping("/delete")
+    public Result<Object> deleteStorage(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
+
+        BigInteger owner = userService.getUserId(request);
+        return Result.success();
+    }
+
+
 
 
     @PutMapping("/transfer-group")
@@ -54,9 +62,8 @@ public class StorageController {
         if (storageOwnerId == null) {
             return Result.error(404, "找不到该存储介质");
         }
-        HttpSession session = request.getSession();
 
-        BigInteger owner = userService.getUserId(session);
+        BigInteger owner = userService.getUserId(request);
         Integer srcGroupPrivilege, dstGroupPrivilege;
         if (!userService.isGroup(storageOwnerId)) {
             if (!owner.equals(storageOwnerId)) {
