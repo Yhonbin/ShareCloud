@@ -2,6 +2,8 @@ package com.firefly.sharemount.controller.interceptors;
 
 
 import com.firefly.sharemount.component.RedisTemplateComponent;
+import com.firefly.sharemount.service.UserService;
+import net.bytebuddy.build.Plugin;
 import org.springframework.data.keyvalue.core.KeyValueTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -21,12 +23,13 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Resource
     private RedisTemplateComponent redisTemplateComponent;
 
+    @Resource
+    private UserService userService;
+
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws IOException {
         HttpSession httpSession = request.getSession();
-        System.err.println(httpSession.getId());
-        String catchUuid = redisTemplateComponent.get("ShareMount:UUID:" + httpSession.getId());
-        System.out.println(catchUuid);
+        String catchUuid = userService.getUuid(httpSession)
         if (catchUuid == null) {
             response.setStatus(401);
             response.setContentType("application/json;charset=utf-8");

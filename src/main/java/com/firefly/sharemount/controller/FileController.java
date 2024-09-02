@@ -8,6 +8,7 @@ import com.firefly.sharemount.pojo.dto.FileStatDTO;
 import com.firefly.sharemount.pojo.dto.ListFilesResponse;
 import com.firefly.sharemount.pojo.dto.SingleFileRequestDTO;
 import com.firefly.sharemount.service.FileService;
+import com.firefly.sharemount.service.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,14 +27,15 @@ public class FileController {
     private RedisTemplateComponent redisTemplateComponent;
 
     @Resource
+    private UserService userService;
+
+    @Resource
     private FileService fileService;
 
     @GetMapping("/ls")
     public Result<ListFilesResponse> listFiles(@RequestBody SingleFileRequestDTO file, HttpServletRequest request) {
         HttpSession session = request.getSession();
-        String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
-        if (s == null) return Result.error(401,"登录过期,请求失败");
-        BigInteger userId = new BigInteger(s, 10);
+        BigInteger userId = userService.getUserId(session);
         if (file.getRoot() == null) file.setRoot(userId);
         // 鉴权
         ListFilesResponse ret = new ListFilesResponse();
@@ -46,9 +48,7 @@ public class FileController {
     @PostMapping("/mkdir")
     public Result<Object> makeDir(@RequestBody CurDirPathRequestDTO dirPath, HttpServletRequest request) {
         HttpSession session = request.getSession();
-        String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
-        if (s == null) return Result.error(401,"登录过期,请求失败");
-        BigInteger userId = new BigInteger(s, 10);
+        BigInteger userId = userService.getUserId(session);
         if (dirPath.getRoot() == null) dirPath.setRoot(userId);
         FileBO dir = fileService.findFileBO(dirPath.getRoot(),dirPath.getPath());
         fileService.mkdir(dir,dirPath.getVirtual());

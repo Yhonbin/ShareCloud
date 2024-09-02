@@ -43,8 +43,7 @@ public class StorageController {
     public Result<Object> uploadStorage(@RequestBody StorageDTO storageDto, HttpServletRequest request) {
 
         HttpSession session = request.getSession();
-        String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
-        BigInteger owner = new BigInteger(s); // 拥有者
+        BigInteger owner =  userService.getUserId(session);
         storageDto.setOwner(owner);
         storageService.uploadStorage(storageDto);
         return Result.success();
@@ -60,8 +59,8 @@ public class StorageController {
             return Result.error(404, "找不到该存储介质");
         }
         HttpSession session = request.getSession();
-        String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
-        BigInteger owner = new BigInteger(s);
+
+        BigInteger owner = userService.getUserId(session);
         Integer srcGroupPrivilege, dstGroupPrivilege;
         if (!userService.isGroup(storageOwnerId)) {
             if (!owner.equals(storageOwnerId)) {
@@ -96,9 +95,6 @@ public class StorageController {
         if (storageOwnerId == null) {
             return Result.error(404, "找不到该存储介质");
         }
-        HttpSession session = request.getSession();
-        String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
-        BigInteger userId = new BigInteger(s);
         return Result.success();
     }
 

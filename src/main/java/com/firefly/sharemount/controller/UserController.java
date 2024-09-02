@@ -25,6 +25,7 @@ import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Api(tags = "用户管理接口")
 @RestController
@@ -110,19 +111,18 @@ public class UserController {
         UUID key = UUID.randomUUID();
         httpSession.setAttribute("UUID", key);
         redisTemplateComponent.set("ShareMount:SESSION:UUID:" + httpSession.getId(), key.toString());
-        redisTemplateComponent.setExpire("ShareMount:SESSION:UUID:" + httpSession.getId(),TIME_OUT_MINUTE-1);
+        redisTemplateComponent.setExpire("ShareMount:SESSION:UUID:" + httpSession.getId(),TIME_OUT_MINUTE-1, TimeUnit.MINUTES);
 
         redisTemplateComponent.set("ShareMount:SESSION:USER:" + httpSession.getId(), userInfo.getUserId().toString());
-        redisTemplateComponent.setExpire("ShareMount:SESSION:USER:" + httpSession.getId(),TIME_OUT_MINUTE);
+        redisTemplateComponent.setExpire("ShareMount:SESSION:USER:" + httpSession.getId(),TIME_OUT_MINUTE,TimeUnit.MINUTES);
         return Result.success();
     }
 
     @PostMapping("/participation")
     public Result<Object> addGroup(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
         HttpSession session = request.getSession();
-        String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
-        if (s == null) return Result.error(401,"登录过期，添加失败");
-        BigInteger userId = new BigInteger(s);
+        BigInteger userId = userService.getUserId(session);
+
         String groupName = jsonObject.get("group").toString();
         User userGroup = userInfoService.createGroup(userId,groupName);
         return Result.success(userGroup);
@@ -131,7 +131,7 @@ public class UserController {
     @PostMapping("/join-group/{groupId}")
     public Result<Object> joinGroup(@PathVariable BigInteger groupId, HttpServletRequest request) {
         HttpSession session = request.getSession();
-        BigInteger userId = new BigInteger(redisTemplateComponent.get("SESSION:USER:" + session.getId()));
+        BigInteger userId = userService.getUserId(session);
         if (groupId == null) {
             return Result.error(401,"添加失败 请先输入要添加的小组信息");
         }
@@ -147,7 +147,7 @@ public class UserController {
         if (groupId == null) {
             return Result.error(401,"退出失败 请先输入要退出的小组信息");
         }
-        BigInteger userId = new BigInteger(redisTemplateComponent.get("SESSION:USER:" + session.getId()));
+        BigInteger userId = userService.getUserId(session);
         if (!userInfoService.exitGroup(userId, groupId)) {
             return Result.error(404, "退出失败 您已不在该小组");
         }
@@ -160,7 +160,7 @@ public class UserController {
         if (groupId == null) {
             return Result.error(401,"删除失败 请先确定要删除的小组信息");
         }
-        BigInteger userId = new BigInteger(redisTemplateComponent.get("SESSION:USER:" + session.getId()));
+        BigInteger userId = userService.getUserId(session);
         return Result.error(501,"未实现");
     }
 }

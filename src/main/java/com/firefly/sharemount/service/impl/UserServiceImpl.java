@@ -1,14 +1,18 @@
 package com.firefly.sharemount.service.impl;
 
+import com.firefly.sharemount.component.RedisTemplateComponent;
+import com.firefly.sharemount.config.ApplicationConfiguration;
 import com.firefly.sharemount.mapper.UserInfoMapper;
 import com.firefly.sharemount.mapper.UserMapper;
 import com.firefly.sharemount.pojo.data.User;
 import com.firefly.sharemount.pojo.data.UserInfo;
 import com.firefly.sharemount.pojo.dto.UserDTO;
 import com.firefly.sharemount.service.UserService;
+import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 
 @Service
@@ -18,6 +22,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private UserInfoMapper userInfoMapper;
+
+    @Resource
+    private RedisTemplateComponent redisTemplateComponent;
 
     @Override
     public User findByName(String username) {
@@ -42,5 +49,15 @@ public class UserServiceImpl implements UserService {
     public boolean isGroup(BigInteger userId) {
         UserInfo userInfo = userInfoMapper.findByUserId(userId);
         return userInfo == null;
+    }
+
+    @Override
+    public BigInteger getUserId(HttpSession httpSession) {
+        return new BigInteger(redisTemplateComponent.get("ShareMount:USER:" + httpSession.getId()),10);
+    }
+
+    @Override
+    public String getUuid(HttpSession httpSession) {
+        return redisTemplateComponent.get("ShareMount:UUID:" + httpSession.getId());
     }
 }

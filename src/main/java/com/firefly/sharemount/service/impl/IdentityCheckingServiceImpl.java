@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class IdentityCheckingServiceImpl implements IdentityCheckingService {
@@ -42,7 +43,7 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
         String senderEmail = (String)applicationConfiguration.getNestedConfig("spring.mail.username");
         helper.setFrom(senderEmail);
         redisTemplateComponent.set(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),code);
-        redisTemplateComponent.setExpire(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),TIME_OUT_SECOND* 3L);
+        redisTemplateComponent.setExpire(String.format(REDIS_EMAIL_VERIFICATION_FORMAT,email),TIME_OUT_SECOND* 3L, TimeUnit.SECONDS);
         mailSender.send(mimeMessage);
 
     }
@@ -65,7 +66,7 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
         }
         String code = VerifyingCodeUtil.generateVerifyCode(6);
         redisTemplateComponent.set(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),code);
-        redisTemplateComponent.setExpire(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),TIME_OUT_SECOND);
+        redisTemplateComponent.setExpire(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),TIME_OUT_SECOND,TimeUnit.SECONDS);
         //todo
 
         return true;
