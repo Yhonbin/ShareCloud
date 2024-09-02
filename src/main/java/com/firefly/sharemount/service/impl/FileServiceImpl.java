@@ -145,6 +145,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
     public void mountOn(FileBO file, BigInteger storageId) {
         // 挂载
         Deque<String> vfRestPath = file.getVfRestPath();
@@ -164,7 +165,6 @@ public class FileServiceImpl implements FileService {
         if (file.getVfRestPath().isEmpty()) {
             mountMapper.deleteByPathId(parent);
         }
-
     }
 
     @Override
