@@ -74,6 +74,7 @@ public class StorageServiceImpl implements StorageService {
         storageMapper.uploadStorage(storageDto);
         BigInteger id = storageMapper.getInsertId();
         storageMapper.uploadStorageInterface(id, storageDto);
+        storageMapper.uploadStorageLog(id,false, "");
     }
 
     @Override

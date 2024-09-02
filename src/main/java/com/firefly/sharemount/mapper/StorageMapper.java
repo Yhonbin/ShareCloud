@@ -37,4 +37,7 @@ public interface StorageMapper {
 
     @Update("UPDATE storage SET owner = #{groupId} WHERE is_deleted = 0 AND owner = #{owner}")
     void transferToGroup(@Param("owner") BigInteger owner, @Param("groupId") BigInteger groupId);
+
+    @Insert("INSERT INTO storage_log(id,success, log) VALUES (#{id},#{success}, #{log})")
+    void uploadStorageLog(@Param("id") BigInteger id, @Param("success") boolean success, @Param("log") String log);
 }
