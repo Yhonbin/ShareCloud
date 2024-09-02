@@ -48,6 +48,7 @@ public class StorageController {
     public Result<Object> deleteStorage(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
 
         BigInteger owner = userService.getUserId(request);
+
         return Result.success();
     }
 

@@ -26,18 +26,25 @@ public class FileController {
     @Resource
     private FileService fileService;
 
-    @GetMapping("/ls")
+    @PostMapping("/ls")
     public Result<ListFilesResponseDTO> listFiles(@RequestBody SingleFileRequestDTO file, HttpServletRequest request) {
 
         BigInteger userId = userService.getUserId(request);
+
         if (file.getRoot() == null) file.setRoot(userId);
         // 鉴权
         ListFilesResponseDTO ret = new ListFilesResponseDTO();
         FileBO dir = fileService.findFileBO(file.getRoot(), file.getPath());
+        /*
+        if (root == null) root = userId;
+        ListFilesResponseDTO ret = new ListFilesResponseDTO();
+        FileBO dir = fileService.findFileBO(root, path);
+        */
         System.out.printf("[%s] File operation: ls %s%n", new Date(), dir.toString());
         ret.setDir(fileService.getStat(dir));
         ret.setChildren(fileService.listDir(dir, dir.getStorage() == null ? null : dir.getStorage().getId()));
         return Result.success(ret);
+
     }
 
     @PostMapping("/mkdir")
