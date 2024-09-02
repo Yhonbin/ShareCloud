@@ -115,8 +115,10 @@ public class LocalStorageAccessor implements StorageAccessor {
     @SneakyThrows
     public List<FileStatDTO> listDir(String path) {
         lastAccessTime = System.currentTimeMillis();
-        File[] children = new File(rootDir, path).listFiles();
-        if (children == null) throw new IOException("Listing file is not a directory.");
+        File parent = new File(rootDir, path);
+        if (!parent.isDirectory()) return new ArrayList<>();
+        File[] children = parent.listFiles();
+        if (children == null) return new ArrayList<>();
         ArrayList<FileStatDTO> ret = new ArrayList<>(children.length);
         for (File file : children) ret.add(getFileStat(file));
         return ret;
