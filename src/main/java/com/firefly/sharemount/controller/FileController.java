@@ -2,13 +2,12 @@ package com.firefly.sharemount.controller;
 
 import com.firefly.sharemount.pojo.data.FileBO;
 import com.firefly.sharemount.pojo.data.Result;
-import com.firefly.sharemount.pojo.dto.CurDirPathRequestDTO;
+import com.firefly.sharemount.pojo.dto.MkdirRequestDTO;
 import com.firefly.sharemount.pojo.dto.ListFilesResponseDTO;
 import com.firefly.sharemount.pojo.dto.SingleFileRequestDTO;
 import com.firefly.sharemount.service.FileService;
 import com.firefly.sharemount.service.UserService;
 import io.swagger.annotations.Api;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -42,7 +41,7 @@ public class FileController {
     }
 
     @PostMapping("/mkdir")
-    public Result<Object> makeDir(@RequestBody CurDirPathRequestDTO dirPath, HttpServletRequest request) {
+    public Result<Object> makeDir(@RequestBody MkdirRequestDTO dirPath, HttpServletRequest request) {
         HttpSession session = request.getSession();
         BigInteger userId = userService.getUserId(session);
         if (dirPath.getRoot() == null) dirPath.setRoot(userId);

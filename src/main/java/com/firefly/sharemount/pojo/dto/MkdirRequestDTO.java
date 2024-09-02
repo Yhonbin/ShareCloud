@@ -12,7 +12,7 @@ import java.math.BigInteger;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CurDirPathRequestDTO {
+public class MkdirRequestDTO {
     @ApiModelProperty(value = "请求路径", required = true, example = "aaa/bbb")
     @Pattern(regexp = "^[^\\\\:*?\"<>|]+$", message = "路径包含非法字符")
     String path;
