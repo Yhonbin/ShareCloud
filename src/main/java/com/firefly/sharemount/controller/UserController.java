@@ -20,12 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Api(tags = "用户管理接口")
@@ -111,13 +108,13 @@ public class UserController {
 
         Map<String, Object> claims = new HashMap<>();
 
-        claims.put("userId", userInfo.getUserId());
+
+        claims.put("userId", userInfo.getUserId().toString());
         String token = JwtUtil.genToken(claims);
 
         redisTemplateComponent.set("ShareMount-userId:" + userInfo.getUserId(), token);
         redisTemplateComponent.setExpire("ShareMount-userId:" + userInfo.getUserId(), TIME_OUT_MINUTE, TimeUnit.MINUTES);
-
-
+        System.err.println(token);
         return Result.success(token);
     }
 

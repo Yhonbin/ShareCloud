@@ -27,9 +27,10 @@ public class FileController {
     @Resource
     private FileService fileService;
 
-    @GetMapping("/ls")
+    @PostMapping("/ls")
     public Result<ListFilesResponseDTO> listFiles(@RequestBody SingleFileRequestDTO file, HttpServletRequest request) {
         BigInteger userId = userService.getUserId(request);
+
         if (file.getRoot() == null) file.setRoot(userId);
         FileBO dir = fileService.findFileBO(file.getRoot(), file.getPath());
         // TODO 鉴权
@@ -38,6 +39,7 @@ public class FileController {
         ret.setDir(fileService.getStat(dir));
         ret.setChildren(fileService.listDir(dir, dir.getStorage() == null ? null : dir.getStorage().getId()));
         return Result.success(ret);
+
     }
 
     @PostMapping("/mkdir")

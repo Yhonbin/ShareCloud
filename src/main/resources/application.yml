@@ -4,7 +4,7 @@ spring:
     host: ${REDIS_URL:localhost}
     port: ${REDIS_PORT:6379}
     username: ${REDIS_USERNAME:default}
-    password: ${REDIS_PASSWORD:635123}
+    password: ${REDIS_PASSWORD:}
     database: ${REDIS_DATABASE:0}
     lettuce:
       pool:
