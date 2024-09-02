@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ListFilesResponse {
+public class ListFilesResponseDTO {
     FileStatDTO dir;
 
     List<FileStatDTO> children;

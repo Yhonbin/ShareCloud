@@ -12,7 +12,7 @@ public interface SymbolicLinkMapper {
     @Select("SELECT * FROM symbolic_link WHERE id = #{id} AND is_deleted = 0")
     SymbolicLink getById(@Param("id") BigInteger id);
 
-    @Select("SELECT * FROM symbolic_link WHERE parent = #{parent} AND name COLLATE utf8_general_ci = #{name} AND is_deleted = 0 LIMIT 1")
+    @Select("SELECT * FROM symbolic_link WHERE parent = #{parent} AND name = #{name} AND is_deleted = 0 LIMIT 1")
     SymbolicLink findByParentPathAndName(@Param("parent") BigInteger parent, @Param("name") String name);
 
     @Select("SELECT * FROM symbolic_link WHERE parent = #{parent} AND is_deleted = 0")
