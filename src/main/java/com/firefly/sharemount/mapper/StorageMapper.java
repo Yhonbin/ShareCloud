@@ -24,7 +24,6 @@ public interface StorageMapper {
             "WHERE s.is_deleted = 0")
     StorageConnectionLog getLogById(@Param("id") BigInteger id);
 
-
     @Insert("INSERT INTO storage(owner,name, occupation, readonly)" +
             "VALUES (#{owner},#{name},#{occupation}, #{readonly})")
     void uploadStorage(StorageDTO storageDto);
@@ -33,7 +32,7 @@ public interface StorageMapper {
     BigInteger getInsertId();
 
     @Insert("INSERT INTO storage_interface(id, interface) VALUES (#{id},#{storageInterface})")
-    void uploadStorageInterface(@Param("id") BigInteger id,@Param("storageDto") StorageDTO storageDto);
+    void uploadStorageInterface(@Param("id") BigInteger id, @Param("storageDto") StorageDTO storageDto);
 
     @Update("UPDATE storage SET owner = #{groupId} WHERE is_deleted = 0 AND owner = #{owner}")
     void transferToGroup(@Param("owner") BigInteger owner, @Param("groupId") BigInteger groupId);

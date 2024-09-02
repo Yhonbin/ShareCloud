@@ -5,6 +5,7 @@ import com.firefly.sharemount.pojo.data.FileBO;
 import com.firefly.sharemount.mapper.*;
 import com.firefly.sharemount.pojo.data.*;
 import com.firefly.sharemount.pojo.dto.FileStatDTO;
+import com.firefly.sharemount.pojo.dto.StorageStatDTO;
 import com.firefly.sharemount.service.FileService;
 import com.firefly.sharemount.service.StorageService;
 import com.firefly.sharemount.service.UserService;
@@ -14,10 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
-import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -89,11 +87,11 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public List<FileStatDTO> listDir(FileBO file, BigInteger ignoreStorageId) {
-        LinkedList<FileStatDTO> ret = new LinkedList<>();
+        HashMap<String, FileStatDTO> ret = new HashMap<>();
         try {
             StorageAccessor storage = file.getStorage() == null ? null : storageService.getConnection(file.getStorage().getId());
             if (storage != null) {
-                ret.addAll(storage.listDir(String.join("/", file.getStorageRestPath())));
+                storage.listDir(String.join("/", file.getStorageRestPath())).forEach(stat -> ret.put(stat.getName(), stat));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,19 +99,36 @@ public class FileServiceImpl implements FileService {
         if (file.getVfRestPath().isEmpty()) {
             List<VirtualFolder> children = fsMapper.findChildren(file.getVirtualFolder().getId());
             for (VirtualFolder child : children) {
-                file.getVfRestPath().offerLast(child.getName());
-                FileBO bo = findFileBO(file.getVfOwner(), file.getVfRestPath());
-                ret.add(getStat(bo, bo.getStorage() != null && bo.getStorage().getId().equals(ignoreStorageId)));
-                file.getVfRestPath().pollLast();
+                BigInteger mountId = mountMapper.findByPathId(child.getId());
+                StorageStatDTO storageStat = mountId != null ? storageService.getStorageStat(mountId) : null;
+                if (ret.containsKey(child.getName())) {
+                    ret.get(child.getName()).setMount(storageStat);
+                    continue;
+                }
+                FileStatDTO childStat = new FileStatDTO();
+                childStat.setName(child.getName());
+                childStat.setType("vdir");
+                childStat.setMount(storageStat);
+                ret.put(child.getName(), childStat);
+            }
+            List<SymbolicLink> links = symbolicLinkMapper.findAllByParentPath(file.getVirtualFolder().getId());
+            for (SymbolicLink link : links) {
+                FileStatDTO linkStat = new FileStatDTO();
+                linkStat.setName(link.getName());
+                linkStat.setType("link");
+                linkStat.setLinkTargetUser(userService.getUserDTO(link.getTargetUser()));
+                String targetPath = symbolicLinkMapper.getTargetPathById(link.getId());
+                linkStat.setLinkTarget(targetPath);
+                linkStat.setLinkTargetStat(getStat(findFileBO(link.getTargetUser(), PathUtil.pathToQueue(targetPath))));
+                ret.put(link.getName(), linkStat);
             }
         }
-        return ret;
+        return new LinkedList<>(ret.values());
     }
 
     @Override
     @Transactional
     public void mkdir(FileBO file, Boolean virtual) {
-        // TODO 事务
         if (file.getStorage() == null || virtual) {
             BigInteger parent = file.getVirtualFolder().getId();
             for (String p : file.getVfRestPath()) {
@@ -199,6 +214,10 @@ public class FileServiceImpl implements FileService {
             folder = fsMapper.getById(folder.getParent());
         }
         return mountMapper.findByPathId(folder.getId());
+    }
+
+    public FileBO findFileBO(BigInteger id, Deque<String> path) {
+        return findFileBO(userMapper.getById(id), path);
     }
 
     public FileBO findFileBO(User user, Deque<String> path) {

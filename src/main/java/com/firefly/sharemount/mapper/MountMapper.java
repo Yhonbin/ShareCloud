@@ -8,7 +8,7 @@ import java.util.List;
 @Mapper
 @CacheNamespace
 public interface MountMapper {
-    @Select("SELECT storage_id FROM mount  WHERE path = #{id} AND is_deleted = 0 LIMIT 1")
+    @Select("SELECT storage_id FROM mount WHERE path = #{id} AND is_deleted = 0 LIMIT 1")
     BigInteger findByPathId(@Param("id") BigInteger id);
 
     @Update("UPDATE mount SET is_deleted = 1 WHERE path = #{id}")

@@ -14,7 +14,6 @@ public interface StorageService {
 
     StorageAccessor getConnection(BigInteger id);
 
-
     void uploadStorage(StorageDTO storageDto);
 
     void transferToGroup(BigInteger owner, BigInteger groupId);
