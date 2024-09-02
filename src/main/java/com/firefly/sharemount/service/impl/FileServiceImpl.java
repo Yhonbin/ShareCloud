@@ -182,26 +182,13 @@ public class FileServiceImpl implements FileService {
     }
 
     private VirtualFolder findLastVirtualFolder(VirtualFolder folder, Deque<String> path) {
-        if (path.isEmpty()) return folder;
-        String nextName = path.pollFirst();
-        if (path.isEmpty() && nextName.isEmpty()) {
-            path.offerFirst(nextName);
-            return folder;
-        }
-        do {
-            VirtualFolder nextFolder = fsMapper.findChildByName(folder.getId(), nextName);
-            if (nextFolder == null) {
-                path.offerFirst(nextName);
-                return folder;
-            }
+        while (!path.isEmpty()) {
+            VirtualFolder nextFolder = fsMapper.findChildByName(folder.getId(), path.peekFirst());
+            if (nextFolder == null) return folder;
             folder = nextFolder;
-            nextName = path.pollFirst();
-        } while (!path.isEmpty());
-        VirtualFolder fin = fsMapper.findChildByName(folder.getId(), nextName);
-        if (fin == null) {
-            path.offerFirst(nextName);
-            return folder;
-        } else return fin;
+            path.pollFirst();
+        }
+        return folder;
     }
 
     private BigInteger findLastStorageId(VirtualFolder folder, Deque<String> path) {
