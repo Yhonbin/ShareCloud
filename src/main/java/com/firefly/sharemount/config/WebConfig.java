@@ -20,9 +20,11 @@ public class WebConfig implements WebMvcConfigurer {
     // 注册拦截器
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(corsInterceptor).addPathPatterns("/api/**");
+
         registry.addInterceptor(loginInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns("/api/user/email-verify","/api/user/register","/api/user/login");
+
     }
 
 

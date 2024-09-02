@@ -8,10 +8,12 @@ import com.firefly.sharemount.pojo.data.User;
 import com.firefly.sharemount.pojo.data.UserInfo;
 import com.firefly.sharemount.pojo.dto.UserDTO;
 import com.firefly.sharemount.service.UserService;
+import com.firefly.sharemount.utils.JwtUtil;
 import org.springframework.boot.autoconfigure.cache.CacheProperties;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 
@@ -52,12 +54,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public BigInteger getUserId(HttpSession httpSession) {
-        return new BigInteger(redisTemplateComponent.get("ShareMount:USER:" + httpSession.getId()),10);
+    public BigInteger getUserId(HttpServletRequest request) {
+        return JwtUtil.getUserId(request.getHeader("Authorization"));
     }
 
-    @Override
-    public String getUuid(HttpSession httpSession) {
-        return redisTemplateComponent.get("ShareMount:UUID:" + httpSession.getId());
-    }
+
 }
