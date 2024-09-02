@@ -76,11 +76,20 @@ public class LocalStorageAccessor implements StorageAccessor {
         Files.move(Paths.get(source), Paths.get(dest));
     }
 
+    private boolean deleteTree(File file) {
+        if (!file.exists()) return false;
+        File[] children = file.listFiles();
+        if (children != null) {
+            for (File child : children) deleteTree(child);
+        }
+        return file.delete();
+    }
+
     @Override
     @SneakyThrows
     public void delete(String path) {
         lastAccessTime = System.currentTimeMillis();
-        Files.delete(Paths.get(path));
+        if (!deleteTree(new File(path))) throw new IOException("Failed to delete file.");
     }
 
     @Override

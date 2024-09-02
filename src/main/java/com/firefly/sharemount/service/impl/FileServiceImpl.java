@@ -1,6 +1,8 @@
 package com.firefly.sharemount.service.impl;
 
 import com.firefly.sharemount.dao.StorageAccessor;
+import com.firefly.sharemount.exception.FileAlreadyExistsException;
+import com.firefly.sharemount.exception.FileNotExistsException;
 import com.firefly.sharemount.pojo.data.FileBO;
 import com.firefly.sharemount.mapper.*;
 import com.firefly.sharemount.pojo.data.*;
@@ -128,7 +130,8 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public void mkdir(FileBO file, Boolean virtual) {
+    public void mkdir(FileBO file, Boolean virtual) throws FileAlreadyExistsException {
+        if (file.getSymbolicLink() != null) throw new FileAlreadyExistsException();
         if (file.getStorage() == null || virtual) {
             BigInteger parent = file.getVirtualFolder().getId();
             for (String p : file.getVfRestPath()) {
@@ -143,8 +146,13 @@ public class FileServiceImpl implements FileService {
             if (file.getStorageRestPath().isEmpty()) return;
             StorageAccessor storage = storageService.getConnection(file.getStorage().getId());
             String name = file.getStorageRestPath().pollLast();
-            storage.mkdir(String.join("/", file.getStorageRestPath()), name);
-            file.getStorageRestPath().offerLast(name);
+            try {
+                storage.mkdir(String.join("/", file.getStorageRestPath()), name);
+            } catch (Exception e) {
+                throw new FileAlreadyExistsException();
+            } finally {
+                file.getStorageRestPath().offerLast(name);
+            }
         }
     }
 
@@ -163,9 +171,37 @@ public class FileServiceImpl implements FileService {
 
     }
 
-    @Override
-    public void delete(FileBO file) {
+    private void deleteVirtualTree(VirtualFolder folder) {
+        fsMapper.deleteById(folder.getId());
+        mountMapper.deleteByPathId(folder.getId());
+        symbolicLinkMapper.deleteAllChildrenSymbolicLinkByPathId(folder.getId());
+        List<VirtualFolder> children = fsMapper.findChildren(folder.getId());
+        children.forEach(this::deleteVirtualTree);
+    }
 
+    @Override
+    @Transactional
+    public void delete(FileBO file) throws FileNotExistsException {
+        if (file.getSymbolicLink() != null) {
+            symbolicLinkMapper.deleteById(file.getSymbolicLink().getId());
+            file.setSymbolicLink(null);
+            file.setLinkOwner(null);
+        } else {
+            boolean storageSuccess = file.getStorage() != null;
+            if (storageSuccess) {
+                try {
+                    StorageAccessor storage = storageService.getConnection(file.getStorage().getId());
+                    storage.delete(String.join("/", file.getStorageRestPath()));
+                } catch (Exception ignored) {
+                    storageSuccess = false;
+                }
+            }
+            boolean virtualSuccess = file.getVfRestPath().isEmpty();
+            if (virtualSuccess) {
+                deleteVirtualTree(file.getVirtualFolder());
+            }
+            if (!storageSuccess && !virtualSuccess) throw new FileNotExistsException();
+        }
     }
 
     @Override
