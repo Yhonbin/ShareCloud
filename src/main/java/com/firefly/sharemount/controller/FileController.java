@@ -3,20 +3,20 @@ package com.firefly.sharemount.controller;
 import com.firefly.sharemount.component.RedisTemplateComponent;
 import com.firefly.sharemount.pojo.data.FileBO;
 import com.firefly.sharemount.pojo.data.Result;
+import com.firefly.sharemount.pojo.dto.CurDirPathRequestDTO;
 import com.firefly.sharemount.pojo.dto.FileStatDTO;
 import com.firefly.sharemount.pojo.dto.ListFilesResponse;
 import com.firefly.sharemount.pojo.dto.SingleFileRequestDTO;
 import com.firefly.sharemount.service.FileService;
 import io.swagger.annotations.Api;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.File;
 import java.math.BigInteger;
+import java.util.Dictionary;
 
 @Api(tags = "文件管理接口")
 @RestController
@@ -32,7 +32,7 @@ public class FileController {
     public Result<ListFilesResponse> listFiles(@RequestBody SingleFileRequestDTO file, HttpServletRequest request) {
         HttpSession session = request.getSession();
         String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
-        if (s == null) return Result.error(401,"登录过期，添加失败");
+        if (s == null) return Result.error(401,"登录过期,请求失败");
         BigInteger userId = new BigInteger(s, 10);
         if (file.getRoot() == null) file.setRoot(userId);
         // 鉴权
@@ -42,4 +42,17 @@ public class FileController {
         ret.setDir(fileService.getStat(dir));
         return Result.success(ret);
     }
+
+    @PostMapping("/mkdir")
+    public Result<Object> makeDir(@RequestBody CurDirPathRequestDTO dirPath, HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String s = redisTemplateComponent.get("SESSION:USER:" + session.getId());
+        if (s == null) return Result.error(401,"登录过期,请求失败");
+        BigInteger userId = new BigInteger(s, 10);
+        if (dirPath.getRoot() == null) dirPath.setRoot(userId);
+        FileBO dir = fileService.findFileBO(dirPath.getRoot(),dirPath.getPath());
+        fileService.mkdir(dir,dirPath.getVirtual());
+        return Result.success();
+    }
+
 }

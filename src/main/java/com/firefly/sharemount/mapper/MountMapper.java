@@ -16,4 +16,7 @@ public interface MountMapper {
 
     @Select("SELECT path FROM mount WHERE storage_id = #{id} AND is_deleted = 0")
     List<BigInteger> findMountPointsByStorageId(@Param("id") BigInteger id);
+
+    @Insert("INSERT INTO mount(path,storage_id) VALUES (#{path}, #{storageId})")
+    void insertMount(@Param("path") BigInteger path, @Param("storageId") BigInteger storageId);
 }

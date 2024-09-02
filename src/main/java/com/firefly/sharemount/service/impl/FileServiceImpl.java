@@ -10,6 +10,7 @@ import com.firefly.sharemount.service.StorageService;
 import com.firefly.sharemount.service.UserService;
 import com.firefly.sharemount.utils.PathUtil;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
@@ -100,6 +101,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
     public void mkdir(FileBO file, Boolean virtual) {
         // TODO 事务
         if (file.getStorage() == null || virtual) {
@@ -108,6 +110,10 @@ public class FileServiceImpl implements FileService {
                 fsMapper.mkdir(parent, p);
                 parent = fsMapper.getInsertId();
             }
+            // 获取virtualFolder
+            VirtualFolder virtualFolder = fsMapper.getById(parent);
+            file.setVirtualFolder(virtualFolder);
+            file.setVfRestPath(new LinkedList<>());
         } else {
             if (file.getStorageRestPath().isEmpty()) return;
             StorageAccessor storage = storageService.getConnection(file.getStorage().getId());
@@ -140,10 +146,23 @@ public class FileServiceImpl implements FileService {
     @Override
     public void mountOn(FileBO file, BigInteger storageId) {
         // 挂载
+        Deque<String> vfRestPath = file.getVfRestPath();
+        BigInteger parent = file.getVirtualFolder().getId();
+        if (!vfRestPath.isEmpty()) {
+            for (String p : vfRestPath) {
+                fsMapper.mkdir(parent, p);
+                parent = fsMapper.getInsertId();
+            }
+        }
+        mountMapper.insertMount(parent, storageId);
     }
 
     @Override
     public void unmountOn(FileBO file) {
+        BigInteger parent = file.getVirtualFolder().getId();
+        if (file.getVfRestPath().isEmpty()) {
+            mountMapper.deleteByPathId(parent);
+        }
 
     }
 

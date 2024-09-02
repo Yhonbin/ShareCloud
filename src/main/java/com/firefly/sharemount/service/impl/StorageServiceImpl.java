@@ -61,6 +61,7 @@ public class StorageServiceImpl implements StorageService {
         Boolean isReadOnly = storageMapper.getById(id).getReadonly();
         String configStr = storageMapper.getInterfaceById(id);
         StorageAccessor connection = makeConnection(isReadOnly, JSON.parseObject(configStr));
+        config.loadConfig();
         Object retryObj = config.getNestedConfig("connection.retry-times");
         int retry = retryObj instanceof Integer ? (Integer) retryObj : 0;
         if (connection != null) connections.put(id, new StorageAccessorRetryProxy(connection, retry));

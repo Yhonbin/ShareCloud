@@ -24,7 +24,7 @@ public interface FilesystemMapper {
     @Insert("INSERT INTO filesystem(name, parent) VALUES(#{fileName}, null)")
     void addUserRoot(@Param("fileName") String fileName);
 
-    @Insert("INSERT INTO filesystem(name, parent) VALUES(#{dirName}, #{parent}")
+    @Insert("INSERT INTO filesystem(name, parent) VALUES(#{dirName}, #{parent})")
     void mkdir(@Param("parent") BigInteger parent, @Param("dirName") String dirName);
 
     @Select("SELECT LAST_INSERT_ID()")
