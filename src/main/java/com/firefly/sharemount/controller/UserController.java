@@ -110,11 +110,11 @@ public class UserController {
 
         UUID key = UUID.randomUUID();
         httpSession.setAttribute("UUID", key);
-        redisTemplateComponent.set("ShareMount:SESSION:UUID:" + httpSession.getId(), key.toString());
-        redisTemplateComponent.setExpire("ShareMount:SESSION:UUID:" + httpSession.getId(),TIME_OUT_MINUTE-1, TimeUnit.MINUTES);
+        redisTemplateComponent.set("ShareMount:UUID:" + httpSession.getId(), key.toString());
+        redisTemplateComponent.setExpire("ShareMount:UUID:" + httpSession.getId(),TIME_OUT_MINUTE-1, TimeUnit.MINUTES);
 
-        redisTemplateComponent.set("ShareMount:SESSION:USER:" + httpSession.getId(), userInfo.getUserId().toString());
-        redisTemplateComponent.setExpire("ShareMount:SESSION:USER:" + httpSession.getId(),TIME_OUT_MINUTE,TimeUnit.MINUTES);
+        redisTemplateComponent.set("ShareMount:USER:" + httpSession.getId(), userInfo.getUserId().toString());
+        redisTemplateComponent.setExpire("ShareMount:USER:" + httpSession.getId(),TIME_OUT_MINUTE,TimeUnit.MINUTES);
         return Result.success();
     }
 

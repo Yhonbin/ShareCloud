@@ -29,7 +29,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull Object handler) throws IOException {
         HttpSession httpSession = request.getSession();
-        String catchUuid = userService.getUuid(httpSession)
+        String catchUuid = userService.getUuid(httpSession);
         if (catchUuid == null) {
             response.setStatus(401);
             response.setContentType("application/json;charset=utf-8");
