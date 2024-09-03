@@ -10,7 +10,6 @@ import com.firefly.sharemount.service.UserService;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import sun.misc.BASE64Encoder;
 
 import javax.activation.MimetypesFileTypeMap;
 import javax.annotation.Resource;
@@ -22,6 +21,7 @@ import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
+import java.util.Base64;
 
 @Api(tags = "文件传输接口")
 @RestController
@@ -53,7 +53,7 @@ public class TransportController {
     }
 
     @PostMapping("/upload/direct")
-    public Result<Object> uploadDirectly(MultipartFile file, BigInteger root, String path, HttpServletRequest request) {
+    public Result<Object> uploadDirectly(@RequestParam("file") MultipartFile file, @RequestParam(required = false) BigInteger root, String path, HttpServletRequest request) {
         BigInteger userId = userService.getUserId(request);
         root = root == null ? userId : root;
         FileBO dir = fileService.findFileBO(root, path);
@@ -73,7 +73,8 @@ public class TransportController {
     }
 
     @GetMapping("/download")
-    public void download(BigInteger root, String path, Boolean preview, HttpServletRequest request, HttpServletResponse response) {
+    public void download(@RequestParam(required = false) BigInteger root, String path, @RequestParam(required = false) Boolean preview, HttpServletRequest request, HttpServletResponse response) {
+        if (preview == null) preview = true;
         BigInteger userId = userService.getUserId(request);
         root = root == null ? userId : root;
         FileBO dir = fileService.findFileBO(root, path);
@@ -87,7 +88,7 @@ public class TransportController {
             response.setContentType(mimeType);
             if (!preview) {
                 String contentDisposition = request.getHeader("User-Agent").contains("Firefox")
-                        ? "attachment; fileName==?UTF-8?B?" + new BASE64Encoder().encode(filename.getBytes(StandardCharsets.UTF_8))
+                        ? "attachment; fileName==?UTF-8?B?" + Base64.getEncoder().encodeToString(filename.getBytes(StandardCharsets.UTF_8))
                         : "attachment; fileName=" + URLEncoder.encode(filename, "UTF-8");
                 response.setHeader("Content-Disposition", contentDisposition);
             }
