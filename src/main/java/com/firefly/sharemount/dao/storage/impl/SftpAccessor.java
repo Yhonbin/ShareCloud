@@ -33,7 +33,7 @@ public class SftpAccessor implements StorageAccessor {
         return String.format("%s@%s:%d", user, host, port);
     }
 
-    public static SftpAccessor createNew(JSONObject args) {
+    public static SftpAccessor createNew(Boolean readonly, JSONObject args) {
         String host = args.getString("host");
         Integer port = args.getInteger("port");
         String user = args.getString("user");

@@ -26,7 +26,7 @@ public class LocalStorageAccessor implements StorageAccessor {
         return path == null ? "<Error>" : path;
     }
 
-    public static LocalStorageAccessor createNew(JSONObject args) {
+    public static LocalStorageAccessor createNew(Boolean readonly, JSONObject args) {
         String path = args.getString("root");
         return path == null ? null : new LocalStorageAccessor(path);
     }

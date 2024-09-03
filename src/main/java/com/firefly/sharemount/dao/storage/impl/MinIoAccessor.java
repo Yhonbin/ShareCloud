@@ -28,7 +28,7 @@ public class MinIoAccessor implements StorageAccessor {
         return endpoint + bucket;
     }
 
-    public static MinIoAccessor createNew(JSONObject args) {
+    public static MinIoAccessor createNew(Boolean readonly, JSONObject args) {
         String endpoint = args.getString("endpoint");
         String accessKey = args.getString("accessKey");
         String secretKey = args.getString("secretKey");

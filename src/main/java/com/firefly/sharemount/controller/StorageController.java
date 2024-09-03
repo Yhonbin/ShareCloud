@@ -49,6 +49,7 @@ public class StorageController {
             dto.setStorages(storageService.listStorage(id)
                     .stream()
                     .map(s -> storageService.getStorageStat(s))
+                    .peek(s -> s.setOwner(null))
                     .collect(Collectors.toList()));
             return dto;
         }).collect(Collectors.toList()));
