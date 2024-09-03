@@ -1,7 +1,13 @@
-package com.firefly.sharemount.dao;
+package com.firefly.sharemount.dao.storage;
 
+import com.firefly.sharemount.exception.BadConnectionToStorageException;
 import com.firefly.sharemount.pojo.dto.FileStatDTO;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 
 public class StorageAccessorRetryProxy implements StorageAccessor {
@@ -14,17 +20,17 @@ public class StorageAccessorRetryProxy implements StorageAccessor {
     }
 
     @Override
-    public void connect() {
+    public void connect() throws BadConnectionToStorageException {
         accessor.connect();
     }
 
     @Override
-    public void mkdir(String path, String name) {
+    public void mkdir(String path, String name) throws FileAlreadyExistsException, BadConnectionToStorageException {
         for (int i = 0; i < retryTimes; i++) {
             try {
                 accessor.mkdir(path, name);
                 break;
-            } catch (Exception e) {
+            } catch (BadConnectionToStorageException e) {
                 e.printStackTrace();
                 accessor.close();
                 accessor.connect();
@@ -34,12 +40,12 @@ public class StorageAccessorRetryProxy implements StorageAccessor {
     }
 
     @Override
-    public void createEmpty(String path, String name) {
+    public void createEmpty(String path, String name) throws FileAlreadyExistsException, BadConnectionToStorageException {
         for (int i = 0; i < retryTimes; i++) {
             try {
                 accessor.createEmpty(path, name);
                 break;
-            } catch (Exception e) {
+            } catch (BadConnectionToStorageException e) {
                 e.printStackTrace();
                 accessor.close();
                 accessor.connect();
@@ -50,12 +56,12 @@ public class StorageAccessorRetryProxy implements StorageAccessor {
     }
 
     @Override
-    public void copy(String source, String dest) {
+    public void copy(String source, String dest) throws IOException, BadConnectionToStorageException {
         for (int i = 0; i < retryTimes; i++) {
             try {
                 accessor.copy(source, dest);
                 break;
-            } catch (Exception e) {
+            } catch (BadConnectionToStorageException e) {
                 e.printStackTrace();
                 accessor.close();
                 accessor.connect();
@@ -65,7 +71,7 @@ public class StorageAccessorRetryProxy implements StorageAccessor {
     }
 
     @Override
-    public void move(String source, String dest) {
+    public void move(String source, String dest) throws IOException, BadConnectionToStorageException {
         for (int i = 0; i < retryTimes; i++) {
             try {
                 accessor.move(source, dest);
@@ -80,7 +86,17 @@ public class StorageAccessorRetryProxy implements StorageAccessor {
     }
 
     @Override
-    public void delete(String path) {
+    public void upload(String path, String name, MultipartFile srcFile) throws IOException {
+        accessor.upload(path, name, srcFile);
+    }
+
+    @Override
+    public void download(String path, String name, OutputStream os) throws IOException {
+        accessor.download(path, name, os);
+    }
+
+    @Override
+    public void delete(String path) throws FileNotFoundException, BadConnectionToStorageException {
         for (int i = 0; i < retryTimes; i++) {
             try {
                 accessor.delete(path);
@@ -95,7 +111,7 @@ public class StorageAccessorRetryProxy implements StorageAccessor {
     }
 
     @Override
-    public boolean exists(String path) {
+    public boolean exists(String path) throws BadConnectionToStorageException {
         for (int i = 0; i < retryTimes; i++) {
             try {
                 return accessor.exists(path);
@@ -109,7 +125,7 @@ public class StorageAccessorRetryProxy implements StorageAccessor {
     }
 
     @Override
-    public FileStatDTO getFileStat(String path) {
+    public FileStatDTO getFileStat(String path) throws BadConnectionToStorageException {
         for (int i = 0; i < retryTimes; i++) {
             try {
                 return accessor.getFileStat(path);
@@ -123,7 +139,7 @@ public class StorageAccessorRetryProxy implements StorageAccessor {
     }
 
     @Override
-    public List<FileStatDTO> listDir(String path) {
+    public List<FileStatDTO> listDir(String path) throws FileNotFoundException, BadConnectionToStorageException {
         for (int i = 0; i < retryTimes; i++) {
             try {
                 return accessor.listDir(path);

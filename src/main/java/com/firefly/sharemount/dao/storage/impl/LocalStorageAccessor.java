@@ -1,23 +1,26 @@
-package com.firefly.sharemount.dao.impl;
+package com.firefly.sharemount.dao.storage.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.firefly.sharemount.dao.StorageAccessor;
+import com.firefly.sharemount.dao.storage.StorageAccessor;
+import com.firefly.sharemount.dao.storage.StorageAccessorMeta;
 import com.firefly.sharemount.pojo.dto.FileStatDTO;
-import lombok.SneakyThrows;
+import org.apache.commons.io.IOUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@StorageAccessorMeta(
+        displayTypeName = "LocalStorage",
+        acceptInterfaceType = {"localStorage"},
+        allowMultipartUpload = true
+)
 public class LocalStorageAccessor implements StorageAccessor {
-    public static String getType() {
-        return "LocalStorage";
-    }
-
     public static String getConnectionInfo(JSONObject args) {
         String path = args.getString("root");
         return path == null ? "<Error>" : path;
@@ -37,41 +40,64 @@ public class LocalStorageAccessor implements StorageAccessor {
     }
 
     @Override
-    @SneakyThrows
     public void connect() {
         lastAccessTime = System.currentTimeMillis();
         if (!rootDir.exists()) {
-            if (!rootDir.mkdirs()) throw new IOException("Failed to mkdirs.");
+            if (!rootDir.mkdirs()) throw new RuntimeException("Failed to mkdirs.");
         }
-        if (!rootDir.isDirectory()) throw new IOException("Use an absolute file as the storage root directory.");
+        if (!rootDir.isDirectory()) throw new RuntimeException("Use an absolute file as the storage root directory.");
     }
 
     @Override
-    @SneakyThrows
-    public void mkdir(String path, String name) {
+    public void mkdir(String path, String name) throws FileAlreadyExistsException {
         lastAccessTime = System.currentTimeMillis();
         File dir = new File(rootDir, String.join("", path, "/", name));
-        if (!dir.mkdirs()) throw new IOException("Failed to mkdirs.");
+        if (!dir.mkdirs()) throw new FileAlreadyExistsException("Failed to mkdirs.");
     }
 
     @Override
-    @SneakyThrows
-    public void createEmpty(String path, String name) {
+    public void createEmpty(String path, String name) throws FileAlreadyExistsException {
         lastAccessTime = System.currentTimeMillis();
         File newFile = new File(rootDir, String.join("", path, "/", name));
-        if (!newFile.createNewFile()) throw new IOException("Failed to mkdirs.");
+        boolean success;
+        try {
+            success = newFile.createNewFile();
+        } catch (IOException e) {
+            success = false;
+        }
+        if (!success) throw new FileAlreadyExistsException("Failed to create new file.");
     }
 
     @Override
-    @SneakyThrows
-    public void copy(String source, String dest) {
+    public void upload(String path, String name, MultipartFile srcFile) throws IOException {
+        lastAccessTime = System.currentTimeMillis();
+        File parent = new File(rootDir, path);
+        if (!parent.exists()) {
+            if (!parent.mkdirs()) throw new FileAlreadyExistsException("File already exists.");
+        }
+        else if (!parent.isDirectory()) throw new FileAlreadyExistsException("File already exists.");
+        File newFile = new File(parent, name);
+        if (newFile.exists()) throw new FileAlreadyExistsException("File already exists.");
+        srcFile.transferTo(newFile);
+    }
+
+    @Override
+    public void download(String path, String name, OutputStream os) throws IOException {
+        lastAccessTime = System.currentTimeMillis();
+        File file = new File(rootDir, String.join("", path, "/", name));
+        if (!file.isFile()) throw new FileNotFoundException("File not exists.");
+        FileInputStream fis = new FileInputStream(file);
+        IOUtils.copy(fis, os);
+    }
+
+    @Override
+    public void copy(String source, String dest) throws IOException {
         lastAccessTime = System.currentTimeMillis();
         Files.copy(Paths.get(source), Paths.get(dest));
     }
 
     @Override
-    @SneakyThrows
-    public void move(String source, String dest) {
+    public void move(String source, String dest) throws IOException {
         lastAccessTime = System.currentTimeMillis();
         Files.move(Paths.get(source), Paths.get(dest));
     }
@@ -86,10 +112,9 @@ public class LocalStorageAccessor implements StorageAccessor {
     }
 
     @Override
-    @SneakyThrows
-    public void delete(String path) {
+    public void delete(String path) throws FileNotFoundException {
         lastAccessTime = System.currentTimeMillis();
-        if (!deleteTree(new File(path))) throw new IOException("Failed to delete file.");
+        if (!deleteTree(new File(path))) throw new FileNotFoundException("Failed to delete file.");
     }
 
     @Override
@@ -121,13 +146,12 @@ public class LocalStorageAccessor implements StorageAccessor {
     }
 
     @Override
-    @SneakyThrows
-    public List<FileStatDTO> listDir(String path) {
+    public List<FileStatDTO> listDir(String path) throws FileNotFoundException {
         lastAccessTime = System.currentTimeMillis();
         File parent = new File(rootDir, path);
-        if (!parent.isDirectory()) return new ArrayList<>();
+        if (!parent.isDirectory()) throw new FileNotFoundException();
         File[] children = parent.listFiles();
-        if (children == null) return new ArrayList<>();
+        if (children == null) throw new FileNotFoundException();
         ArrayList<FileStatDTO> ret = new ArrayList<>(children.length);
         for (File file : children) ret.add(getFileStat(file));
         return ret;

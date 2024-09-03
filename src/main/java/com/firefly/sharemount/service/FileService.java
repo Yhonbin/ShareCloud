@@ -1,12 +1,17 @@
 package com.firefly.sharemount.service;
 
-import com.firefly.sharemount.exception.FileAlreadyExistsException;
-import com.firefly.sharemount.exception.FileNotExistsException;
+import com.firefly.sharemount.exception.BadConnectionToStorageException;
+import com.firefly.sharemount.exception.WriteToVirtualFolderNotAllowedException;
 import com.firefly.sharemount.pojo.data.FileBO;
 import com.firefly.sharemount.pojo.data.User;
 import com.firefly.sharemount.pojo.dto.FileStatDTO;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.List;
 
 public interface FileService {
@@ -14,7 +19,7 @@ public interface FileService {
 
     FileBO findFileBO(User user, String path);
 
-    void mkdir(FileBO file, Boolean virtual) throws FileAlreadyExistsException;
+    void mkdir(FileBO file, Boolean virtual) throws FileAlreadyExistsException, BadConnectionToStorageException;
 
     void createEmpty(FileBO file);
 
@@ -22,11 +27,15 @@ public interface FileService {
 
     void move(FileBO source, FileBO dest);
 
-    void delete(FileBO file) throws FileNotExistsException;
+    void upload(FileBO dest, MultipartFile srcFile) throws WriteToVirtualFolderNotAllowedException, IOException, BadConnectionToStorageException;
 
-    FileStatDTO getStat(FileBO file);
+    void download(FileBO source, OutputStream os) throws BadConnectionToStorageException, IOException;
 
-    List<FileStatDTO> listDir(FileBO file, BigInteger ignoreStorageId);
+    void delete(FileBO file) throws FileNotFoundException, BadConnectionToStorageException;
+
+    FileStatDTO getStat(FileBO file) throws BadConnectionToStorageException;
+
+    List<FileStatDTO> listDir(FileBO file, BigInteger ignoreStorageId) throws BadConnectionToStorageException, FileNotFoundException;
 
     void mountOn(FileBO file, BigInteger storageId);
 

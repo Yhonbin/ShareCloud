@@ -1,8 +1,8 @@
 package com.firefly.sharemount.service.impl;
 
-import com.firefly.sharemount.dao.StorageAccessor;
-import com.firefly.sharemount.exception.FileAlreadyExistsException;
-import com.firefly.sharemount.exception.FileNotExistsException;
+import com.firefly.sharemount.dao.storage.StorageAccessor;
+import com.firefly.sharemount.exception.BadConnectionToStorageException;
+import com.firefly.sharemount.exception.WriteToVirtualFolderNotAllowedException;
 import com.firefly.sharemount.pojo.data.FileBO;
 import com.firefly.sharemount.mapper.*;
 import com.firefly.sharemount.pojo.data.*;
@@ -14,9 +14,14 @@ import com.firefly.sharemount.service.UserService;
 import com.firefly.sharemount.utils.PathUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.*;
 
 @Service
@@ -54,11 +59,11 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileStatDTO getStat(FileBO file) {
+    public FileStatDTO getStat(FileBO file) throws BadConnectionToStorageException {
         return getStat(file, false);
     }
 
-    public FileStatDTO getStat(FileBO file, boolean ignoreStorage) {
+    public FileStatDTO getStat(FileBO file, boolean ignoreStorage) throws BadConnectionToStorageException {
         if (file.getSymbolicLink() != null) {
             FileStatDTO ret = new FileStatDTO();
             ret.setName(file.getSymbolicLink().getName());
@@ -88,15 +93,14 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public List<FileStatDTO> listDir(FileBO file, BigInteger ignoreStorageId) {
+    public List<FileStatDTO> listDir(FileBO file, BigInteger ignoreStorageId) throws BadConnectionToStorageException {
         HashMap<String, FileStatDTO> ret = new HashMap<>();
         try {
             StorageAccessor storage = file.getStorage() == null ? null : storageService.getConnection(file.getStorage().getId());
             if (storage != null) {
                 storage.listDir(String.join("/", file.getStorageRestPath())).forEach(stat -> ret.put(stat.getName(), stat));
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (FileNotFoundException ignored) {
         }
         if (file.getVfRestPath().isEmpty()) {
             List<VirtualFolder> children = fsMapper.findChildren(file.getVirtualFolder().getId());
@@ -130,8 +134,8 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public void mkdir(FileBO file, Boolean virtual) throws FileAlreadyExistsException {
-        if (file.getSymbolicLink() != null) throw new FileAlreadyExistsException();
+    public void mkdir(FileBO file, Boolean virtual) throws FileAlreadyExistsException, BadConnectionToStorageException {
+        if (file.getSymbolicLink() != null) throw new FileAlreadyExistsException("");
         if (file.getStorage() == null || virtual) {
             BigInteger parent = file.getVirtualFolder().getId();
             for (String p : file.getVfRestPath()) {
@@ -148,8 +152,6 @@ public class FileServiceImpl implements FileService {
             String name = file.getStorageRestPath().pollLast();
             try {
                 storage.mkdir(String.join("/", file.getStorageRestPath()), name);
-            } catch (Exception e) {
-                throw new FileAlreadyExistsException();
             } finally {
                 file.getStorageRestPath().offerLast(name);
             }
@@ -171,6 +173,31 @@ public class FileServiceImpl implements FileService {
 
     }
 
+    @Override
+    public void upload(FileBO dest, MultipartFile srcFile) throws WriteToVirtualFolderNotAllowedException, BadConnectionToStorageException, IOException {
+        if (dest.getStorage() == null) throw new WriteToVirtualFolderNotAllowedException();
+        if (dest.getStorageRestPath().isEmpty()) throw new FileAlreadyExistsException("");
+        String name = dest.getStorageRestPath().pollLast();
+        StorageAccessor storage = storageService.getConnection(dest.getStorage().getId());
+        try {
+            storage.upload(String.join("/", dest.getStorageRestPath()), name, srcFile);
+        } finally {
+            dest.getStorageRestPath().offerLast(name);
+        }
+    }
+
+    @Override
+    public void download(FileBO source, OutputStream os) throws BadConnectionToStorageException, IOException {
+        if (source.getStorage() == null) throw new FileNotFoundException();
+        String name = source.getStorageRestPath().pollLast();
+        StorageAccessor storage = storageService.getConnection(source.getStorage().getId());
+        try {
+            storage.download(String.join("/", source.getStorageRestPath()), name, os);
+        } finally {
+            source.getStorageRestPath().offerLast(name);
+        }
+    }
+
     private void deleteVirtualTree(VirtualFolder folder) {
         fsMapper.deleteById(folder.getId());
         mountMapper.deleteByPathId(folder.getId());
@@ -181,26 +208,26 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public void delete(FileBO file) throws FileNotExistsException {
+    public void delete(FileBO file) throws BadConnectionToStorageException, FileNotFoundException {
         if (file.getSymbolicLink() != null) {
             symbolicLinkMapper.deleteById(file.getSymbolicLink().getId());
             file.setSymbolicLink(null);
             file.setLinkOwner(null);
         } else {
+            boolean virtualSuccess = file.getVfRestPath().isEmpty();
+            if (virtualSuccess) {
+                deleteVirtualTree(file.getVirtualFolder());
+            }
             boolean storageSuccess = file.getStorage() != null;
             if (storageSuccess) {
                 try {
                     StorageAccessor storage = storageService.getConnection(file.getStorage().getId());
                     storage.delete(String.join("/", file.getStorageRestPath()));
-                } catch (Exception ignored) {
+                } catch (FileNotFoundException e) {
                     storageSuccess = false;
                 }
             }
-            boolean virtualSuccess = file.getVfRestPath().isEmpty();
-            if (virtualSuccess) {
-                deleteVirtualTree(file.getVirtualFolder());
-            }
-            if (!storageSuccess && !virtualSuccess) throw new FileNotExistsException();
+            if (!storageSuccess && !virtualSuccess) throw new FileNotFoundException("");
         }
     }
 

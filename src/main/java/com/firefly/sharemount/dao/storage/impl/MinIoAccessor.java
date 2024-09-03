@@ -1,19 +1,23 @@
-package com.firefly.sharemount.dao.impl;
+package com.firefly.sharemount.dao.storage.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.firefly.sharemount.dao.StorageAccessor;
+import com.firefly.sharemount.dao.storage.StorageAccessor;
+import com.firefly.sharemount.dao.storage.StorageAccessorMeta;
 import com.firefly.sharemount.pojo.dto.FileStatDTO;
 import io.minio.*;
 import lombok.SneakyThrows;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
+import java.io.OutputStream;
 import java.util.List;
 
+@StorageAccessorMeta(
+        displayTypeName = "MinIO",
+        acceptInterfaceType = {"minio"},
+        allowMultipartUpload = true
+)
 public class MinIoAccessor implements StorageAccessor {
-    public static String getType() {
-        return "MinIO";
-    }
-
     public static String getConnectionInfo(JSONObject args) {
         String endpoint = args.getString("endpoint");
         String bucket = args.getString("bucket");
@@ -89,6 +93,18 @@ public class MinIoAccessor implements StorageAccessor {
         lastAccessTime = System.currentTimeMillis();
         copy(source, dest);
         client.removeObject(RemoveObjectArgs.builder().bucket(bucket).object(source).build());
+    }
+
+    @Override
+    @SneakyThrows
+    public void upload(String path, String name, MultipartFile srcFile) {
+
+    }
+
+    @Override
+    @SneakyThrows
+    public void download(String path, String name, OutputStream os) {
+
     }
 
     @Override

@@ -3,18 +3,16 @@ package com.firefly.sharemount.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.firefly.sharemount.config.ApplicationConfiguration;
-import com.firefly.sharemount.dao.StorageAccessor;
-import com.firefly.sharemount.dao.StorageAccessorRetryProxy;
-import com.firefly.sharemount.dao.impl.LocalStorageAccessor;
-import com.firefly.sharemount.dao.impl.MinIoAccessor;
-import com.firefly.sharemount.dao.impl.SftpAccessor;
+import com.firefly.sharemount.dao.storage.StorageAccessor;
+import com.firefly.sharemount.dao.storage.StorageAccessorFactory;
+import com.firefly.sharemount.dao.storage.StorageAccessorRetryProxy;
+import com.firefly.sharemount.exception.BadConnectionToStorageException;
 import com.firefly.sharemount.mapper.StorageMapper;
 import com.firefly.sharemount.pojo.data.Storage;
 import com.firefly.sharemount.pojo.dto.StorageDTO;
 import com.firefly.sharemount.pojo.dto.StorageStatDTO;
 import com.firefly.sharemount.service.StorageService;
 import com.firefly.sharemount.service.UserService;
-import io.swagger.models.auth.In;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +31,9 @@ public class StorageServiceImpl implements StorageService {
     @Resource
     private ApplicationConfiguration config;
 
+    @Resource
+    private StorageAccessorFactory storageAccessorFactory;
+
     private final ConcurrentHashMap<BigInteger, StorageAccessor> connections = new ConcurrentHashMap<>();
 
     @Override
@@ -49,23 +50,25 @@ public class StorageServiceImpl implements StorageService {
         ret.setReadonly(storage.getReadonly());
         String configStr = storageMapper.getInterfaceById(storage.getId());
         JSONObject interfaceJson = JSON.parseObject(configStr);
-        ret.setType(getType(interfaceJson));
-        ret.setConnectionInfo(getConnectionInfo(interfaceJson));
+        ret.setType(storageAccessorFactory.getType(interfaceJson));
+        ret.setConnectionInfo(storageAccessorFactory.getConnectionInfo(interfaceJson));
         return ret;
     }
 
     @Override
-    public StorageAccessor getConnection(BigInteger id) {
+    public StorageAccessor getConnection(BigInteger id) throws BadConnectionToStorageException {
         StorageAccessor ret = connections.get(id);
         if (ret != null) return ret;
         Boolean isReadOnly = storageMapper.getById(id).getReadonly();
         String configStr = storageMapper.getInterfaceById(id);
-        StorageAccessor connection = makeConnection(isReadOnly, JSON.parseObject(configStr));
+        StorageAccessor connection = storageAccessorFactory.makeConnection(isReadOnly, JSON.parseObject(configStr));
         config.loadConfig();
         Object retryObj = config.getNestedConfig("connection.retry-times");
         int retry = retryObj instanceof Integer ? (Integer) retryObj : 0;
-        if (connection != null) connections.put(id, new StorageAccessorRetryProxy(connection, retry));
-        return connection;
+        StorageAccessor accessor = new StorageAccessorRetryProxy(connection, retry);
+        accessor.connect();
+        connections.put(id, accessor);
+        return accessor;
     }
 
     @Override
@@ -87,39 +90,9 @@ public class StorageServiceImpl implements StorageService {
         return storageMapper.getById(storageId).getOwner();
     }
 
-    private StorageAccessor makeConnection(Boolean isReadOnly, JSONObject config) {
-        switch (config.getString("type")) {
-            case "localStorage":
-                return LocalStorageAccessor.createNew(config);
-            case "MinIO":
-                return MinIoAccessor.createNew(config);
-            case "SFTP":
-                return SftpAccessor.createNew(config);
-        }
-        return null;
-    }
-
-    private String getConnectionInfo(JSONObject config) {
-        switch (config.getString("type")) {
-            case "localStorage":
-                return LocalStorageAccessor.getConnectionInfo(config);
-            case "MinIO":
-                return MinIoAccessor.getConnectionInfo(config);
-            case "SFTP":
-                return SftpAccessor.getConnectionInfo(config);
-        }
-        return "<Error>";
-    }
-
-    private String getType(JSONObject config) {
-        switch (config.getString("type")) {
-            case "localStorage":
-                return LocalStorageAccessor.getType();
-            case "MinIO":
-                return MinIoAccessor.getType();
-            case "SFTP":
-                return SftpAccessor.getType();
-        }
-        return "<Error>";
+    @Override
+    public boolean isAllowMultipartUpload(BigInteger id) {
+        String configStr = storageMapper.getInterfaceById(id);
+        return storageAccessorFactory.isAllowMultipartUpload(JSON.parseObject(configStr));
     }
 }
