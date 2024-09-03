@@ -1,9 +1,12 @@
 package com.firefly.sharemount.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.firefly.sharemount.component.RedisTemplateComponent;
+import com.firefly.sharemount.pojo.data.FileBO;
 import com.firefly.sharemount.pojo.data.Result;
+import com.firefly.sharemount.pojo.dto.MountRequestDTO;
+import com.firefly.sharemount.pojo.dto.SingleFileRequestDTO;
 import com.firefly.sharemount.pojo.dto.StorageDTO;
+import com.firefly.sharemount.service.FileService;
 import com.firefly.sharemount.service.ParticipationService;
 import com.firefly.sharemount.service.StorageService;
 import com.firefly.sharemount.service.UserService;
@@ -12,18 +15,13 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
+import java.util.Date;
 
 @Api(tags = "介质管理接口")
 @RestController
 @RequestMapping("/api/storage")
 public class StorageController {
-
-
-    @Resource
-    private RedisTemplateComponent redisTemplateComponent;
-
     @Resource
     private StorageService storageService;
 
@@ -33,6 +31,8 @@ public class StorageController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private FileService fileService;
 
     // 添加介质
     @PostMapping("/upload")
@@ -52,8 +52,27 @@ public class StorageController {
         return Result.success();
     }
 
+    @PostMapping("/mount")
+    public Result<Object> makeDir(@RequestBody MountRequestDTO dirPath, HttpServletRequest request) {
+        BigInteger userId = userService.getUserId(request);
+        if (dirPath.getRoot() == null) dirPath.setRoot(userId);
+        FileBO dir = fileService.findFileBO(dirPath.getRoot(),dirPath.getPath());
+        // TODO 鉴权
+        System.out.printf("[%s] Storage operation: mount %s on %s%n", new Date(), dirPath.getStorage(), dir.toString());
+        fileService.mountOn(dir, dirPath.getStorage());
+        return Result.success();
+    }
 
-
+    @PostMapping("/unmount")
+    public Result<Object> makeDir(@RequestBody SingleFileRequestDTO dirPath, HttpServletRequest request) {
+        BigInteger userId = userService.getUserId(request);
+        if (dirPath.getRoot() == null) dirPath.setRoot(userId);
+        FileBO dir = fileService.findFileBO(dirPath.getRoot(),dirPath.getPath());
+        // TODO 鉴权
+        System.out.printf("[%s] Storage operation: unmount on %s%n", new Date(), dir.toString());
+        fileService.unmountOn(dir);
+        return Result.success();
+    }
 
     @PutMapping("/transfer-group")
     public Result<Object> transferToGroup(@RequestBody JSONObject jsonObject, HttpServletRequest request) {
