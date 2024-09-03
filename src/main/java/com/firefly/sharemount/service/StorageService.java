@@ -6,6 +6,7 @@ import com.firefly.sharemount.pojo.dto.StorageDTO;
 import com.firefly.sharemount.pojo.dto.StorageStatDTO;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public interface StorageService {
     StorageStatDTO getStorageStat(BigInteger id);
@@ -16,7 +17,11 @@ public interface StorageService {
 
     void uploadStorage(StorageDTO storageDto);
 
-    void transferToGroup(BigInteger owner, BigInteger groupId);
+    void transfer(BigInteger srcId, BigInteger dstId);
 
     BigInteger getOwnerById(BigInteger storageId);
+
+    void deleteStorage(BigInteger storageId);
+
+    List<Storage> listStorage(BigInteger id);
 }

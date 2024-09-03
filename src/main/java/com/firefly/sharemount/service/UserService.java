@@ -19,5 +19,4 @@ public interface UserService {
     boolean isGroup(BigInteger userId);
 
     BigInteger getUserId(HttpServletRequest request);
-
 }

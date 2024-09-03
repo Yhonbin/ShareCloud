@@ -220,10 +220,12 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void unmountOn(FileBO file) {
-        BigInteger parent = file.getVirtualFolder().getId();
+    public void unmountOn(FileBO file) throws FileNotExistsException{
         if (file.getVfRestPath().isEmpty()) {
+            BigInteger parent = file.getVirtualFolder().getId();
             mountMapper.deleteByPathId(parent);
+        } else {
+            throw new FileNotExistsException();
         }
     }
 

@@ -8,6 +8,7 @@ import com.firefly.sharemount.dao.StorageAccessorRetryProxy;
 import com.firefly.sharemount.dao.impl.LocalStorageAccessor;
 import com.firefly.sharemount.dao.impl.MinIoAccessor;
 import com.firefly.sharemount.dao.impl.SftpAccessor;
+import com.firefly.sharemount.mapper.MountMapper;
 import com.firefly.sharemount.mapper.StorageMapper;
 import com.firefly.sharemount.pojo.data.Storage;
 import com.firefly.sharemount.pojo.dto.StorageDTO;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -29,6 +31,8 @@ public class StorageServiceImpl implements StorageService {
 
     @Resource
     private UserService userService;
+
+    @Resource MountMapper mountMapper;
 
     @Resource
     private ApplicationConfiguration config;
@@ -78,14 +82,26 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void transferToGroup(BigInteger owner, BigInteger groupId) {
-       storageMapper.transferToGroup(owner, groupId);
+    public void transfer(BigInteger srcId, BigInteger dstId) {
+       storageMapper.transferToGroup(srcId, dstId);
     }
 
     @Override
     public BigInteger getOwnerById(BigInteger storageId) {
         return storageMapper.getById(storageId).getOwner();
     }
+
+    @Override
+    public void deleteStorage(BigInteger storageId) {
+        storageMapper.deleteStorage(storageId);
+        mountMapper.deleteStorageFromMount(storageId);
+    }
+
+    @Override
+    public List<Storage> listStorage(BigInteger userId) {
+        return storageMapper.listStorage(userId);
+    }
+
 
     private StorageAccessor makeConnection(Boolean isReadOnly, JSONObject config) {
         switch (config.getString("type")) {
