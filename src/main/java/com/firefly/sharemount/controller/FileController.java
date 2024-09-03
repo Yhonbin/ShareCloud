@@ -28,11 +28,11 @@ public class FileController {
     @Resource
     private FileService fileService;
 
-    @PostMapping("/ls")
-    public Result<ListFilesResponseDTO> listFiles(@RequestBody SingleFileRequestDTO file, HttpServletRequest request) {
+    @GetMapping("/ls")
+    public Result<ListFilesResponseDTO> listFiles(@RequestParam("path") String path, @RequestParam(value = "root", required = false) BigInteger root, HttpServletRequest request) {
         BigInteger userId = userService.getUserId(request);
-        if (file.getRoot() == null) file.setRoot(userId);
-        FileBO dir = fileService.findFileBO(file.getRoot(), file.getPath());
+        if (root == null) root = userId;
+        FileBO dir = fileService.findFileBO(root, path);
         // TODO 鉴权
         ListFilesResponseDTO ret = new ListFilesResponseDTO();
         System.out.printf("[%s] File operation: ls %s%n", new Date(), dir.toString());

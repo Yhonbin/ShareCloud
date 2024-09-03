@@ -67,13 +67,14 @@ public class IdentityCheckingServiceImpl implements IdentityCheckingService {
         String code = VerifyingCodeUtil.generateVerifyCode(6);
         redisTemplateComponent.set(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),code);
         redisTemplateComponent.setExpire(String.format(REDIS_SMS_VERIFICATION_FORMAT,phoneNumber),TIME_OUT_SECOND,TimeUnit.SECONDS);
-        //todo
+        //todo 发送短信验证码
 
         return true;
     }
 
     @Override
     public boolean checkSmsCode(String phoneNumber, String code) {
+        //todo 检验短信验证码
         return false;
     }
 

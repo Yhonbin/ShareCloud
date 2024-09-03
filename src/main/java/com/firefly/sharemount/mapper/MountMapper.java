@@ -19,4 +19,7 @@ public interface MountMapper {
 
     @Insert("INSERT INTO mount(path,storage_id) VALUES (#{path}, #{storageId})")
     void insertMount(@Param("path") BigInteger path, @Param("storageId") BigInteger storageId);
+
+    @Update("UPDATE mount SET is_deleted = 1 WHERE storage_id = #{storageId}")
+    void deleteStorageFromMount(@Param("storageId") BigInteger storageId);
 }

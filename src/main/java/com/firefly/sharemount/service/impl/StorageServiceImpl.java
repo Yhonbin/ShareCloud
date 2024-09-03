@@ -7,6 +7,7 @@ import com.firefly.sharemount.dao.storage.StorageAccessor;
 import com.firefly.sharemount.dao.storage.StorageAccessorFactory;
 import com.firefly.sharemount.dao.storage.StorageAccessorRetryProxy;
 import com.firefly.sharemount.exception.BadConnectionToStorageException;
+import com.firefly.sharemount.mapper.MountMapper;
 import com.firefly.sharemount.mapper.StorageMapper;
 import com.firefly.sharemount.pojo.data.Storage;
 import com.firefly.sharemount.pojo.dto.StorageDTO;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -27,6 +29,8 @@ public class StorageServiceImpl implements StorageService {
 
     @Resource
     private UserService userService;
+
+    @Resource MountMapper mountMapper;
 
     @Resource
     private ApplicationConfiguration config;
@@ -81,8 +85,8 @@ public class StorageServiceImpl implements StorageService {
     }
 
     @Override
-    public void transferToGroup(BigInteger owner, BigInteger groupId) {
-       storageMapper.transferToGroup(owner, groupId);
+    public void transfer(BigInteger srcId, BigInteger dstId) {
+       storageMapper.transferToGroup(srcId, dstId);
     }
 
     @Override
@@ -94,5 +98,15 @@ public class StorageServiceImpl implements StorageService {
     public boolean isAllowMultipartUpload(BigInteger id) {
         String configStr = storageMapper.getInterfaceById(id);
         return storageAccessorFactory.isAllowMultipartUpload(JSON.parseObject(configStr));
+    }
+
+    public void deleteStorage(BigInteger storageId) {
+        storageMapper.deleteStorage(storageId);
+        mountMapper.deleteStorageFromMount(storageId);
+    }
+
+    @Override
+    public List<Storage> listStorage(BigInteger userId) {
+        return storageMapper.listStorage(userId);
     }
 }

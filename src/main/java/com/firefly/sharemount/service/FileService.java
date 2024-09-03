@@ -39,7 +39,7 @@ public interface FileService {
 
     void mountOn(FileBO file, BigInteger storageId);
 
-    void unmountOn(FileBO file);
+    void unmountOn(FileBO file) throws FileNotExistsException;
 
     void createSymbolicLink(FileBO file, User targetUser, String path);
 }

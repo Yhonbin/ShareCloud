@@ -34,9 +34,18 @@ public interface StorageMapper {
     @Insert("INSERT INTO storage_interface(id, interface) VALUES (#{id},#{storageInterface})")
     void uploadStorageInterface(@Param("id") BigInteger id, @Param("storageDto") StorageDTO storageDto);
 
-    @Update("UPDATE storage SET owner = #{groupId} WHERE is_deleted = 0 AND owner = #{owner}")
-    void transferToGroup(@Param("owner") BigInteger owner, @Param("groupId") BigInteger groupId);
+    @Update("UPDATE storage SET owner = #{dstId} WHERE is_deleted = 0 AND owner = #{srcId}")
+    void transferToGroup(@Param("srcId") BigInteger srcId, @Param("groupId") BigInteger dstId);
 
     @Insert("INSERT INTO storage_log(id,success, log) VALUES (#{id},#{success}, #{log})")
     void uploadStorageLog(@Param("id") BigInteger id, @Param("success") boolean success, @Param("log") String log);
+
+    @Select("SELECT * FROM storage WHERE owner = #{owner} AND is_deleted = 0")
+    List<Storage> listStorage(@Param("owner") BigInteger owner);
+
+    @Update("UPDATE storage SET is_deleted = 1 WHERE id = #{storageId}")
+    void deleteStorage(@Param("storageId") BigInteger storageId);
+
+    @Update("UPDATE storage_log SET is_deleted = 1 WHERe ")
+    void deleteStorageLogs(BigInteger storageId);
 }
